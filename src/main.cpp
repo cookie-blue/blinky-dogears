@@ -1,105 +1,94 @@
 #include <Arduino.h>
-#include <avr/wdt.h>
 
-#define FRAME_LENGTH 4
+// -- Pin Configuration ---
+const int ledPins[] = {0, 1};
+const int buttonPin = 2;
 
-unsigned long last_tick = 0;
-uint8_t current_step = 0;
+// --- Patterns ---
+// patterns[patternIndex][stepIndex][led0, led1, duration_ms]
+#define MAX_PATTERN_LENGTH 8
+#define LED1 0
+#define LED2 1
+#define DURATION 2
+const int patterns[][MAX_PATTERN_LENGTH][3] = {
+    // Pattern 0: Alternate blink
+    {{255, 0, 200}, {0, 255, 200}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}},
+    // Pattern 1: Both blink together
+    {{255, 255, 400}, {0, 0, 400}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}},
+    // Pattern 2: Chase effect
+    {{255, 0, 150}, {0, 255, 150}, {255, 255, 150}, {0, 0, 150}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}, {-1, -1, 0}},
+};
 
-void setup() {
-  wdt_disable();
-  pinMode(0, OUTPUT);
-  pinMode(1, OUTPUT);
+const int numPatterns = sizeof(patterns) / sizeof(patterns[0]);
+const int numLeds = sizeof(ledPins) / sizeof(ledPins[0]);
+bool buttonPressed = false;
+
+int getPatternLength(int pattern)
+{
+  int length = 0;
+  for (int i = 0; i < MAX_PATTERN_LENGTH; i++)
+  {
+    // is empty pattern step
+    if (patterns[pattern][i][LED1] < 0 ||
+        patterns[pattern][i][LED2] < 0 ||
+        patterns[pattern][i][DURATION] <= 0)
+    {
+      break;
+    }
+    length++;
+  }
+  return length;
 }
 
-void RTWFlash(uint8_t pin) {
-  digitalWrite(pin, HIGH);
-  delay(41 * FRAME_LENGTH);
-  digitalWrite(pin, LOW);
-  delay(14 * FRAME_LENGTH);
-  digitalWrite(pin, HIGH);
-  delay(6 * FRAME_LENGTH);
-  digitalWrite(pin, LOW);
-  delay(3 * FRAME_LENGTH);
-  digitalWrite(pin, HIGH);
-  delay(6 * FRAME_LENGTH);
-  digitalWrite(pin, LOW);
-  delay(37 * FRAME_LENGTH);
+void setup()
+{
+  for (int i = 0; i < numLeds; i++)
+  {
+    pinMode(ledPins[i], OUTPUT);
+  }
+  pinMode(buttonPin, INPUT_PULLUP);
 }
 
-void FadeIn(uint8_t pin) {
-  for (uint8_t i = 0; i <= 0xFF; i++) {
-    analogWrite(pin, i);
-    delay(5);
-    yield();
+int pattern = 0;
+int step = 0;
+unsigned long previousMillis = 0;
+
+void checkButton()
+{
+  if (digitalRead(buttonPin) == LOW && !buttonPressed)
+  {
+    buttonPressed = true;
+    pattern = (pattern + 1) % numPatterns;
+    step = 0;
+    previousMillis = millis();
+  }
+  else if (digitalRead(buttonPin) == HIGH)
+  {
+    buttonPressed = false;
   }
 }
 
-void FadeOut(uint8_t pin) {
-  for (uint8_t i = 0xFF; i >= 0; i--) {
-    analogWrite(pin, i);
-    delay(5);
-    yield();
+void runPattern()
+{
+  unsigned long currentMillis = millis();
+  int length = getPatternLength(pattern);
+  int duration = patterns[pattern][step][DURATION];
+
+  if (currentMillis - previousMillis >= duration)
+  {
+    previousMillis = currentMillis;
+
+    for (int i = 0; i < numLeds; i++)
+    {
+      analogWrite(ledPins[i], patterns[pattern][step][i]);
+    }
+
+    step = (step + 1) % length;
   }
 }
 
-void flashAB(unsigned long delay_ms) {
-  digitalWrite(1, LOW);
-  digitalWrite(0, HIGH);
-  delay(delay_ms);
-  digitalWrite(0, LOW);
-  digitalWrite(1, HIGH);
-  delay(delay_ms);
-}
-
-void walk(unsigned long delay_ms) {
-  digitalWrite(0, LOW);
-  digitalWrite(1, LOW);
-  delay(delay_ms);
-  digitalWrite(0, LOW);
-  digitalWrite(1, HIGH);
-  delay(delay_ms);
-  digitalWrite(0, HIGH);
-  digitalWrite(1, HIGH);
-  delay(delay_ms);
-  digitalWrite(0, HIGH);
-  digitalWrite(1, LOW);
-  delay(delay_ms);
-}
-
-void walk_rev(unsigned long delay_ms) {
-  digitalWrite(0, LOW);
-  digitalWrite(1, LOW);
-  delay(delay_ms);
-  digitalWrite(0, HIGH);
-  digitalWrite(1, LOW);
-  delay(delay_ms);
-  digitalWrite(0, HIGH);
-  digitalWrite(1, HIGH);
-  delay(delay_ms);
-  digitalWrite(0, LOW);
-  digitalWrite(1, HIGH);
-  delay(delay_ms);
-}
-
-void tick_step() {
-  if (current_step == 0xFF){
-    current_step = 0;
-  }
-
-  analogWrite(0, current_step);
-  analogWrite(1, 0xFF - current_step);
-
-  current_step++;
-}
-
-void tick() {
-  if (millis() >= last_tick + 5){
-    tick_step();
-    last_tick = millis();
-  }
-}
-
-void loop() {
-  tick();
+void loop()
+{
+  checkButton();
+  runPattern();
 }
