@@ -3,22 +3,34 @@
 const int numPatterns = sizeof(patterns) / sizeof(patterns[0]);
 int patternLengths[numPatterns];
 
-void setup()
+void setupPins()
 {
   for (int i = 0; i < LED_COUNT; i++)
   {
     pinMode(ledPins[i], OUTPUT);
   }
   pinMode(buttonPin, INPUT_PULLUP);
+}
 
-  for (int p = 0; p < numPatterns; p++) {
+void calculatePatternLengths()
+{
+  for (int p = 0; p < numPatterns; p++)
+  {
     int len = 0;
-    for (int s = 0; s < MAX_PATTERN_LENGTH; s++) {
-      if (patterns[p][s].duration == 0) break;
+    for (int s = 0; s < MAX_PATTERN_LENGTH; s++)
+    {
+      if (patterns[p][s].duration == 0)
+        break;
       len++;
     }
     patternLengths[p] = len;
   }
+}
+
+void setup()
+{
+  setupPins();
+  calculatePatternLengths();
 }
 
 int pattern = 0;
@@ -47,10 +59,8 @@ void checkButton()
   }
 }
 
-void runFadePattern(unsigned long currentMillis, Step currentPatternStep, int length)
+void runFadePattern(unsigned long currentMillis, Step currentPatternStep)
 {
-  int duration = currentPatternStep.duration;
-
   if (!fading)
   {
     fading = true;
@@ -63,7 +73,7 @@ void runFadePattern(unsigned long currentMillis, Step currentPatternStep, int le
     }
   }
 
-  float progress = float(currentMillis - fadeStartMillis) / duration;
+  float progress = float(currentMillis - fadeStartMillis) / currentPatternStep.duration;
 
   for (int i = 0; i < LED_COUNT; i++)
   {
@@ -75,11 +85,11 @@ void runFadePattern(unsigned long currentMillis, Step currentPatternStep, int le
   {
     fading = false;
     previousMillis = currentMillis;
-    step = (step + 1) % length;
+    step = (step + 1) % patternLengths[pattern];
   }
 }
 
-void runInstantPattern(unsigned long currentMillis, Step currentPatternStep, int length)
+void runInstantPattern(unsigned long currentMillis, Step currentPatternStep)
 {
   previousMillis = currentMillis;
 
@@ -89,24 +99,21 @@ void runInstantPattern(unsigned long currentMillis, Step currentPatternStep, int
     analogWrite(ledPins[i], currentPatternStep.leds[i]);
   }
 
-  step = (step + 1) % length;
+  step = (step + 1) % patternLengths[pattern];
 }
 
 void runPattern()
 {
   unsigned long currentMillis = millis();
   Step currentPatternStep = patterns[pattern][step];
-  int duration = currentPatternStep.duration;
-  bool fade = currentPatternStep.fade;
-  int patternLength = patternLengths[pattern];
 
-  if (fade)
+  if (currentPatternStep.fade)
   {
-    runFadePattern(currentMillis, currentPatternStep, patternLength);
+    runFadePattern(currentMillis, currentPatternStep);
   }
-  else if (currentMillis - previousMillis >= duration)
+  else if (currentMillis - previousMillis >= currentPatternStep.duration)
   {
-    runInstantPattern(currentMillis, currentPatternStep, patternLength);
+    runInstantPattern(currentMillis, currentPatternStep);
   }
 }
 
