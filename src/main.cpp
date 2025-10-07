@@ -1,35 +1,11 @@
-#include <Arduino.h>
-
-// -- Pin Configuration ---
-const int ledPins[] = {0, 1};
-const int buttonPin = 2;
-
-const int numLeds = sizeof(ledPins) / sizeof(ledPins[0]);
-
-struct Step
-{
-  uint8_t leds[numLeds]; // brightness (0–255)
-  unsigned int duration; // milliseconds
-  bool fade;             // true = fade, false = instant
-};
-
-// --- Patterns ---
-// Pattern 0: Alternate blink (no fade)
-const Step pattern0[] = {{{255, 0}, 300, 0}, {{0, 255}, 300, 0}, {{0, 0}, 0, 0}, {{0, 0}, 0, 0}, {{0, 0}, 0, 0}, {{0, 0}, 0, 0}};
-// Pattern 1: Both fade together
-const Step pattern1[] = {{{0, 0}, 800, 1}, {{255, 255}, 800, 1}, {{0, 0}, 800, 1}, {{0, 0}, 0, 0}, {{0, 0}, 0, 0}, {{0, 0}, 0, 0}};
-// Pattern 2: Mixed — blink + fade
-const Step pattern2[] = {{{255, 0}, 200, 0}, {{0, 255}, 200, 1}, {{255, 255}, 400, 1}, {{0, 0}, 200, 0}, {{0, 0}, 0, 0}, {{0, 0}, 0, 0}};
-
-const Step *patterns[] = {pattern0, pattern1, pattern2};
+#include "config.cpp"
 
 const int numPatterns = sizeof(patterns) / sizeof(patterns[0]);
 bool buttonPressed = false;
 
-
 void setup()
 {
-  for (int i = 0; i < numLeds; i++)
+  for (int i = 0; i < LED_COUNT; i++)
   {
     pinMode(ledPins[i], OUTPUT);
   }
@@ -70,7 +46,7 @@ void runFadePattern(unsigned long currentMillis, Step currentPatternStep, int le
     fading = true;
     fadeStartMillis = currentMillis;
 
-    for (int i = 0; i < numLeds; i++)
+    for (int i = 0; i < LED_COUNT; i++)
     {
       startBrightness[i] = currentBrightness[i];
       targetBrightness[i] = currentPatternStep.leds[i];
@@ -79,7 +55,7 @@ void runFadePattern(unsigned long currentMillis, Step currentPatternStep, int le
 
   float progress = float(currentMillis - fadeStartMillis) / duration;
 
-  for (int i = 0; i < numLeds; i++)
+  for (int i = 0; i < LED_COUNT; i++)
   {
     currentBrightness[i] = startBrightness[i] + (targetBrightness[i] - startBrightness[i]) * min(progress, 1.0);
     analogWrite(ledPins[i], currentBrightness[i]);
@@ -97,8 +73,9 @@ void runInstantPattern(unsigned long currentMillis, Step currentPatternStep, int
 {
   previousMillis = currentMillis;
 
-  for (int i = 0; i < numLeds; i++)
+  for (int i = 0; i < LED_COUNT; i++)
   {
+    currentBrightness[i] = currentPatternStep.leds[i];
     analogWrite(ledPins[i], currentPatternStep.leds[i]);
   }
 

@@ -1,0 +1,15 @@
+#include "main.h"
+
+// -- Pin Configuration ---
+const int ledPins[LED_COUNT] = {0, 1};
+const int buttonPin = 2;
+
+// --- Patterns ---
+const Step patterns[][6] = {
+    // Pattern 0: Alternate blink (no fade)
+    {{{255, 0}, 300, 0}, {{0, 255}, 300, 0}, {{0, 0}, 0, 0}, {{0, 0}, 0, 0}, {{0, 0}, 0, 0}, {{0, 0}, 0, 0}},
+    // Pattern 1: Both fade together
+    {{{0, 0}, 800, 1}, {{255, 255}, 800, 1}, {{0, 0}, 800, 1}, {{0, 0}, 0, 0}, {{0, 0}, 0, 0}, {{0, 0}, 0, 0}},
+    // Pattern 2: Mixed — blink + fade
+    {{{255, 0}, 200, 0}, {{0, 255}, 200, 1}, {{255, 255}, 400, 1}, {{0, 0}, 200, 0}, {{0, 0}, 0, 0}, {{0, 0}, 0, 0}},
+};
