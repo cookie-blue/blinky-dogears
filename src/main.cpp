@@ -1,7 +1,7 @@
 #include "config.cpp"
 
 const int numPatterns = sizeof(patterns) / sizeof(patterns[0]);
-bool buttonPressed = false;
+int patternLengths[numPatterns];
 
 void setup()
 {
@@ -10,6 +10,15 @@ void setup()
     pinMode(ledPins[i], OUTPUT);
   }
   pinMode(buttonPin, INPUT_PULLUP);
+
+  for (int p = 0; p < numPatterns; p++) {
+    int len = 0;
+    for (int s = 0; s < MAX_PATTERN_LENGTH; s++) {
+      if (patterns[p][s].duration == 0) break;
+      len++;
+    }
+    patternLengths[p] = len;
+  }
 }
 
 int pattern = 0;
@@ -17,6 +26,7 @@ int step = 0;
 unsigned long previousMillis = 0;
 unsigned long fadeStartMillis = 0;
 bool fading = false;
+bool buttonPressed = false;
 
 int currentBrightness[2] = {0, 0};
 int startBrightness[2] = {0, 0};
@@ -88,7 +98,7 @@ void runPattern()
   Step currentPatternStep = patterns[pattern][step];
   int duration = currentPatternStep.duration;
   bool fade = currentPatternStep.fade;
-  int patternLength = sizeof(patterns[pattern]) / sizeof(currentPatternStep);
+  int patternLength = patternLengths[pattern];
 
   if (fade)
   {
