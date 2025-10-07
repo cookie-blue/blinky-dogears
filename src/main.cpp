@@ -87,7 +87,7 @@ void runPattern()
   unsigned long currentMillis = millis();
   Step currentPatternStep = patterns[pattern][step];
   int duration = currentPatternStep.duration;
-  bool fade = currentPatternStep.duration;
+  bool fade = currentPatternStep.fade;
   int patternLength = sizeof(patterns[pattern]) / sizeof(currentPatternStep);
 
   if (fade)
