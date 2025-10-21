@@ -52,6 +52,10 @@ void checkButton()
     pattern = (pattern + 1) % numPatterns;
     step = 0;
     previousMillis = millis();
+    for (int i = 0; i < LED_COUNT; i++)
+    {
+      analogWrite(ledPins[i], 0);
+    }
   }
   else if (digitalRead(buttonPin) == HIGH)
   {
