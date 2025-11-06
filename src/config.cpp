@@ -1,5 +1,7 @@
 #include "main.h"
 
+#define GAMMA 2.2
+
 // -- Pin Configuration ---
 const int ledPins[LED_COUNT] = {0, 1};
 const int buttonPin = 2;
