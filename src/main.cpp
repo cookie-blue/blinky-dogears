@@ -2,6 +2,53 @@
 
 const int numPatterns = sizeof(patterns) / sizeof(patterns[0]);
 int patternLengths[numPatterns];
+// 12-bit PWM magic
+volatile int Dac[] = {0, 0};
+volatile int Cycle = 0;
+volatile uint8_t activeChannel = 0; // 0 = none, 1 = A, 2 = B
+
+// Overflow interrupt
+ISR(TIMER1_OVF_vect)
+{
+  static int remain[2];
+  if (Cycle == 0)
+  {
+    remain[0] = Dac[0];
+    remain[1] = Dac[1];
+  }
+
+  // Array of OCR registers
+  volatile uint8_t *OCRs[2] = {&OCR1A, &OCR1B};
+
+  for (uint8_t i = 0; i < 2; i++)
+  {
+    if (remain[i] >= 256)
+    {
+      *OCRs[i] = 255;
+      remain[i] -= 256;
+    }
+    else
+    {
+      *OCRs[i] = remain[i];
+      remain[i] = 0;
+    }
+  }
+
+  Cycle = (Cycle + 1) & 0x03;
+}
+
+void setupPWM()
+{
+  // Top value for high (Table 12-2)
+  OCR1C = 255;
+
+  // Enable both PWM channels (A & B)
+  TCCR1 = (1 << PWM1A) | (1 << COM1A0) |
+          (1 << PWM1B) | (1 << COM1B0) |
+          (1 << CS10);
+
+  TIMSK |= 1 << TOIE1; // Timer/Counter1 Overflow Interrupt Enable
+}
 
 void setupPins()
 {
@@ -29,6 +76,7 @@ void calculatePatternLengths()
 
 void setup()
 {
+  setupPWM();
   setupPins();
   calculatePatternLengths();
 }
@@ -43,6 +91,17 @@ bool buttonPressed = false;
 int currentBrightness[2] = {0, 0};
 int startBrightness[2] = {0, 0};
 int targetBrightness[2] = {0, 0};
+
+void analogWrite12(uint8_t pin, int value)
+{
+  cli();
+
+  if (ledPins[0])      Dac[0] = value; // OC1A
+  else if (ledPins[1]) Dac[1] = value; // OC1B
+
+  sei();
+}
+
 
 void checkButton()
 {
