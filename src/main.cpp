@@ -146,7 +146,7 @@ void ledBrightness(uint8_t led, uint8_t brightness)
   Dac[led] = pgm_read_word(&gammaMap[brightness]);
   sei();
   #else
-  analogWrite(ledPins[led], pgm_read_word_near(&gammaMap[brightness]));
+  analogWrite(ledPins[led], pgm_read_byte_near(&gammaMap[brightness]));
   #endif
 }
 
