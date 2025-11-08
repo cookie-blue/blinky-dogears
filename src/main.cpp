@@ -114,8 +114,7 @@ void analogWrite12(uint8_t pin, int value)
 {
   cli();
 
-  if (ledPins[0])      Dac[0] = value; // OC1A
-  else if (ledPins[1]) Dac[1] = value; // OC1B
+  Dac[pin] = value;
 
   sei();
 }
@@ -123,7 +122,7 @@ void analogWrite12(uint8_t pin, int value)
 void ledBrightness(uint8_t led, uint8_t brightness)
 {
   currentBrightness[led] = brightness;
-  analogWrite12(ledPins[led], pgm_read_word(&gammaMap[brightness / 4]));
+  analogWrite12(led, pgm_read_word(&gammaMap[brightness / 4]));
 }
 
 void checkButton()
@@ -136,7 +135,7 @@ void checkButton()
     previousMillis = millis();
     for (int i = 0; i < LED_COUNT; i++)
     {
-      ledBrightness(ledPins[i], 0);
+      ledBrightness(i, 0);
     }
   }
   else if (digitalRead(buttonPin) == HIGH)
@@ -164,7 +163,7 @@ void runFadePattern(unsigned long currentMillis, Step currentPatternStep)
   for (int i = 0; i < LED_COUNT; i++)
   {
     ledBrightness(
-        ledPins[i],
+        i,
         startBrightness[i] + (targetBrightness[i] - startBrightness[i]) * min(progress, 1.0));
   }
 
@@ -182,7 +181,7 @@ void runInstantPattern(unsigned long currentMillis, Step currentPatternStep)
 
   for (int i = 0; i < LED_COUNT; i++)
   {
-    ledBrightness(ledPins[i], currentPatternStep.leds[i]);
+    ledBrightness(i, currentPatternStep.leds[i]);
   }
 
   step = (step + 1) % patternLengths[pattern];
