@@ -1,5 +1,7 @@
 # Blinky Dogears
 
+[Blink Patterns](img/blink/README.md)
+
 ## Photos
 
 ![](img/IMG01.jpg)
