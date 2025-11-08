@@ -4,6 +4,10 @@ This code currently is untested.
 
 [Blink Patterns](img/blink/README.md)
 
+## PCB
+
+![](pcb/pcb_schem.jpg)
+
 ## Photos
 
 ![](img/IMG01.jpg)
