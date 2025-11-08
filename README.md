@@ -1,7 +1,5 @@
 # Blinky Dogears
 
-This code currently is untested.
-
 [Blink Patterns](img/blink/README.md)
 
 ## PCB
