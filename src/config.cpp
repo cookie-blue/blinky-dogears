@@ -2,7 +2,7 @@
 
 // -- Pin Configuration ---
 const int ledPins[LED_COUNT] = {0, 1};
-const int buttonPin = 2;
+const int buttonPin = 9;
 
 // --- Patterns ---
 #define MAX_PATTERN_LENGTH 12
