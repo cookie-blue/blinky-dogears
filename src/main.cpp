@@ -30,10 +30,10 @@ const uint16_t PROGMEM gammaMap[] = {
 void setupPins()
 {
   Serial.println("setting up pins...");
+  ledcSetup(0, PWM_FREQUENCY, PWM_RESOLUTION);
   for (int i = 0; i < LED_COUNT; i++)
   {
-    ledcSetup(i, PWM_FREQUENCY, PWM_RESOLUTION);
-    ledcAttachPin(ledPins[i], i);
+    ledcAttachPin(ledPins[i], 0);
   }
   pinMode(buttonPin, INPUT_PULLUP);
 }
