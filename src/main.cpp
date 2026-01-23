@@ -29,6 +29,7 @@ const uint16_t PROGMEM gammaMap[] = {
 
 void setupPins()
 {
+  Serial.println("setting up pins...");
   for (int i = 0; i < LED_COUNT; i++)
   {
     ledcSetup(i, PWM_FREQUENCY, PWM_RESOLUTION);
@@ -39,6 +40,7 @@ void setupPins()
 
 void calculatePatternLengths()
 {
+  Serial.println("calculating pattern lengths");
   for (int p = 0; p < numPatterns; p++)
   {
     int len = 0;
@@ -54,8 +56,10 @@ void calculatePatternLengths()
 
 void setup()
 {
+  Serial.begin(115200);
   setupPins();
   calculatePatternLengths();
+  Serial.println("ready.");
 }
 
 int pattern = 0;
@@ -83,6 +87,7 @@ void checkButton()
   {
     buttonPressed = true;
     pattern = (pattern + 1) % numPatterns;
+    Serial.printf("switching pattern to %d\n", pattern);
     step = 0;
     previousMillis = millis();
     for (int i = 0; i < LED_COUNT; i++)
