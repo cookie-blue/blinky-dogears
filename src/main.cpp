@@ -1,4 +1,5 @@
 #include "config.cpp"
+#include <cstdarg>
 
 #define PWM_FREQUENCY 5000
 #define PWM_RESOLUTION 12
@@ -6,9 +7,13 @@
 const int numPatterns = sizeof(patterns) / sizeof(patterns[0]);
 int patternLengths[numPatterns];
 
+#define DUTY_TYPE uint16_t
+#define PGM_READ_DUTY(addr) pgm_read_word(addr)
+
 // Gamma brightness lookup table <https://victornpb.github.io/gamma-table-generator>
 // gamma = 2.2 steps = 256 range = 0-4095 (12 bit)
-const uint16_t PROGMEM gammaMap[] = {
+const DUTY_TYPE PROGMEM gammaMap[] =
+{
      0,   0,   0,   0,   0,   1,   1,   2,   2,   3,   3,   4,   5,   6,   7,   8,
      9,  11,  12,  14,  15,  17,  19,  21,  23,  25,  27,  29,  32,  34,  37,  40,
     43,  46,  49,  52,  55,  59,  62,  66,  70,  73,  77,  82,  86,  90,  95,  99,
@@ -25,22 +30,31 @@ const uint16_t PROGMEM gammaMap[] = {
   2616,2644,2671,2700,2728,2756,2785,2813,2842,2871,2900,2930,2959,2989,3019,3049,
   3079,3109,3140,3170,3201,3232,3263,3295,3326,3358,3390,3421,3454,3486,3518,3551,
   3584,3617,3650,3683,3716,3750,3784,3818,3852,3886,3920,3955,3990,4025,4060,4095,
-  };
+};
+
+void log(const char *format, ...)
+{
+  va_list args;
+  va_start(args, format);
+  Serial.printf("[%lu] ", millis());
+  Serial.vprintf(format, args);
+  Serial.println();
+  va_end(args);
+}
 
 void setupPins()
 {
-  Serial.println("setting up pins...");
-  ledcSetup(0, PWM_FREQUENCY, PWM_RESOLUTION);
+  log("setting up pins...");
   for (int i = 0; i < LED_COUNT; i++)
   {
-    ledcAttachPin(ledPins[i], 0);
+    ledcAttach(ledPins[i], PWM_FREQUENCY, PWM_RESOLUTION);
   }
   pinMode(buttonPin, INPUT_PULLUP);
 }
 
 void calculatePatternLengths()
 {
-  Serial.println("calculating pattern lengths");
+  log("calculating pattern lengths");
   for (int p = 0; p < numPatterns; p++)
   {
     int len = 0;
@@ -59,35 +73,28 @@ void setup()
   Serial.begin(115200);
   setupPins();
   calculatePatternLengths();
-  Serial.println("ready.");
+  log("ready.");
 }
 
-int pattern = 0;
-int step = 0;
-unsigned long previousMillis = 0;
-unsigned long fadeStartMillis = 0;
-bool fading = false;
-bool buttonPressed = false;
-
-uint8_t currentBrightness[2] = {0, 0};
-uint8_t startBrightness[2] = {0, 0};
-uint8_t targetBrightness[2] = {0, 0};
+int pattern = 0;  // currently selected pattern
+int step = 0;     // currently active step in pattern
+unsigned long previousMillis = 0;  // time of the last loop run
+unsigned long fadeStartMillis = 0;  // time of fade start
 
 void ledBrightness(uint8_t led, uint8_t brightness)
 {
-  currentBrightness[led] = brightness;
-
-  uint16_t gammaValue = pgm_read_word(&gammaMap[brightness]);
-  ledcWrite(led, gammaValue);
+  DUTY_TYPE gammaValue = PGM_READ_DUTY(&gammaMap[brightness]);
+  ledcWrite(ledPins[led], gammaValue);
 }
 
+bool buttonPressed = false;  // is the button currently pressed
 void checkButton()
 {
   if (digitalRead(buttonPin) == LOW && !buttonPressed)
   {
     buttonPressed = true;
     pattern = (pattern + 1) % numPatterns;
-    Serial.printf("switching pattern to %d\n", pattern);
+    log("switching to pattern %d", pattern);
     step = 0;
     previousMillis = millis();
     for (int i = 0; i < LED_COUNT; i++)
@@ -101,39 +108,53 @@ void checkButton()
   }
 }
 
+
+bool fading = false;  // are we currently fading
+void _startFadePattern(unsigned long currentMillis, Step currentPatternStep)
+{
+  if (step == 0) log("fade pattern %d start", pattern);
+  fading = true;
+  fadeStartMillis = currentMillis;
+
+  for (int i = 0; i < LED_COUNT; i++)
+  {
+    DUTY_TYPE startBrightness = ledcRead(ledPins[i]);
+    DUTY_TYPE targetBrightness = currentPatternStep.leds[i];
+    ledcFade(ledPins[i], startBrightness, targetBrightness, currentPatternStep.duration);
+  }
+}
+
+void _endFadePattern(unsigned long currentMillis)
+{
+  log("fade done.");
+  fading = false;
+  step = (step + 1) % patternLengths[pattern];
+}
+
 void runFadePattern(unsigned long currentMillis, Step currentPatternStep)
 {
   if (!fading)
   {
-    fading = true;
-    fadeStartMillis = currentMillis;
-
-    for (int i = 0; i < LED_COUNT; i++)
-    {
-      startBrightness[i] = currentBrightness[i];
-      targetBrightness[i] = currentPatternStep.leds[i];
-    }
+    _startFadePattern(currentMillis, currentPatternStep);
   }
 
-  float progress = float(currentMillis - fadeStartMillis) / currentPatternStep.duration;
-
-  for (int i = 0; i < LED_COUNT; i++)
+  if (currentMillis - fadeStartMillis >= currentPatternStep.duration)
   {
-    ledBrightness(
-        i,
-        startBrightness[i] + (targetBrightness[i] - startBrightness[i]) * min(progress, 1.0f));
-  }
-
-  if (progress >= 1.0)
-  {
-    fading = false;
-    previousMillis = currentMillis;
-    step = (step + 1) % patternLengths[pattern];
+    _endFadePattern(currentMillis);
   }
 }
 
 void runInstantPattern(unsigned long currentMillis, Step currentPatternStep)
 {
+  if (currentMillis - previousMillis < currentPatternStep.duration)
+  {
+    return;
+  }
+
+  if(step == 0)
+  {
+    log("instant pattern %d start", pattern);
+  }
   previousMillis = currentMillis;
 
   for (int i = 0; i < LED_COUNT; i++)
@@ -153,7 +174,7 @@ void runPattern()
   {
     runFadePattern(currentMillis, currentPatternStep);
   }
-  else if (currentMillis - previousMillis >= currentPatternStep.duration)
+  else
   {
     runInstantPattern(currentMillis, currentPatternStep);
   }
