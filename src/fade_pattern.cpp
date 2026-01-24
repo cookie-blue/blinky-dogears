@@ -27,13 +27,12 @@ void FadePattern::run()
 {
     int pattern = PatternManager::getCurrentPattern();
     int step = PatternManager::getCurrentStep();
-    unsigned long currentMillis = millis();
     const Step currentPatternStep = patterns[pattern][step];
 
     if (!fading)
         _start(currentPatternStep, step);
 
-    if (currentMillis - fadeStartMillis >= currentPatternStep.duration)
+    if (millis() - fadeStartMillis >= currentPatternStep.duration)
     {
         fading = false;
         PatternManager::nextStep();
