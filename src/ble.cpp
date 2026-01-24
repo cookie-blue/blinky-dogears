@@ -73,21 +73,10 @@ class CommandCallbacks : public NimBLECharacteristicCallbacks
         {
             PatternManager::off();
         }
-        else if (rx == "25")
+        else if (rx.length() > 1 && rx[0] == 'B')
         {
-            PatternManager::override(64);
-        }
-        else if (rx == "50")
-        {
-            PatternManager::override(128);
-        }
-        else if (rx == "75")
-        {
-            PatternManager::override(192);
-        }
-        else if (rx == "100")
-        {
-            PatternManager::override(255);
+            int brightness = std::stoi(rx.substr(1));
+            PatternManager::override(255 * brightness / 100);
         }
         else if (rx.length() > 1 && rx[0] == 'P')
         {
