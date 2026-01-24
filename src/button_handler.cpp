@@ -30,7 +30,7 @@ void ButtonHandler::check()
         {
             log("Long press detected: %lu ms", pressDuration);
 
-            #if SATUS_LED_PIN >= 0
+            #ifdef SATUS_LED_PIN
                 digitalWrite(STATUS_LED_PIN, LOW);
                 delay(100);
                 digitalWrite(STATUS_LED_PIN, HIGH);

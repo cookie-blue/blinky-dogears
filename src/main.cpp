@@ -15,9 +15,9 @@ void setup()
 
     pinMode(BUTTON_PIN, INPUT_PULLUP);
 
-    #if STATUS_LED_PIN >= 0
-    pinMode(STATUS_LED_PIN, OUTPUT);
-    digitalWrite(STATUS_LED_PIN, HIGH);
+    #ifdef STATUS_LED_PIN
+        pinMode(STATUS_LED_PIN, OUTPUT);
+        digitalWrite(STATUS_LED_PIN, HIGH);
     #endif
 
     PatternManager::init();
