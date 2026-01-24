@@ -14,6 +14,7 @@ private:
 
 public:
     static void init();
+    static void runPattern();
     static void nextPattern();
     static int getCurrentPattern();
     static int getCurrentStep();

@@ -18,6 +18,14 @@ void PatternManager::init()
     _calculatePatternLengths();
 }
 
+void PatternManager::runPattern()
+{
+    if (patterns[currentPattern][currentStep].fade)
+        FadePattern::run();
+    else
+        InstantPattern::run();
+}
+
 void PatternManager::nextPattern()
 {
     currentPattern = (currentPattern + 1) % numPatterns;

@@ -5,6 +5,31 @@
 #include "pattern_manager.h"
 #include <cstdarg>
 
+void setup()
+{
+    Serial.begin(115200);
+
+    log("setting up pins...");
+    for (int i = 0; i < LED_COUNT; i++)
+    ledcAttach(ledPins[i], PWM_FREQUENCY, PWM_RESOLUTION);
+
+    pinMode(BUTTON_PIN, INPUT_PULLUP);
+
+    #if STATUS_LED_PIN >= 0
+    pinMode(STATUS_LED_PIN, OUTPUT);
+    digitalWrite(STATUS_LED_PIN, HIGH);
+    #endif
+
+    PatternManager::init();
+    log("ready.");
+}
+
+void loop()
+{
+    ButtonHandler::check();
+    PatternManager::runPattern();
+}
+
 void log(const char *format, ...)
 {
     va_list args;
@@ -18,35 +43,4 @@ void log(const char *format, ...)
     Serial.println();
 
     va_end(args);
-}
-
-void setup()
-{
-    Serial.begin(115200);
-
-    log("setting up pins...");
-    for (int i = 0; i < LED_COUNT; i++)
-        ledcAttach(ledPins[i], PWM_FREQUENCY, PWM_RESOLUTION);
-
-    pinMode(BUTTON_PIN, INPUT_PULLUP);
-
-    #if STATUS_LED_PIN >= 0
-        pinMode(STATUS_LED_PIN, OUTPUT);
-        digitalWrite(STATUS_LED_PIN, HIGH);
-    #endif
-
-    PatternManager::init();
-    log("ready.");
-}
-
-void loop()
-{
-    ButtonHandler::check();
-
-    const Step *currentPatternStep = &patterns[PatternManager::getCurrentPattern()][PatternManager::getCurrentStep()];
-
-    if (currentPatternStep->fade)
-        FadePattern::run();
-    else
-        InstantPattern::run();
 }
