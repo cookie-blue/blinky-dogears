@@ -1,11 +1,17 @@
 #include "main.h"
 
 // -- Pin Configuration ---
-const int ledPins[LED_COUNT] = {0, 1};
+const uint8_t ledPins[LED_COUNT] = {0, 1};
 #define STATUS_LED_PIN 8  // comment out to disable
 #define BUTTON_PIN 9
 #define BUTTON_DEBOUNCE_DELAY 50
 #define BUTTON_LONG_PRESS_DURATION 3000
+
+// --- BLE Configuration ---
+#define ENABLE_BLE
+// #define BLE_NAME "blinky"
+#define BLE_SERVICE_UUID "12345678-1234-1234-1234-1234567890ab"
+#define BLE_CHARACTERISTIC_UUID "abcd1234-5678-90ab-cdef-1234567890ab"
 
 // --- Patterns ---
 #define MAX_PATTERN_LENGTH 12

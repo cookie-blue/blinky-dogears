@@ -9,7 +9,7 @@ bool ButtonHandler::longPressHandled = false;
 
 void ButtonHandler::check()
 {
-    int reading = digitalRead(BUTTON_PIN);
+    uint8_t reading = digitalRead(BUTTON_PIN);
 
     if (reading == LOW && !buttonPressed)
     {

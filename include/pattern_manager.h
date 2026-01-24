@@ -6,18 +6,24 @@
 class PatternManager
 {
 private:
-    static int currentPattern;
-    static int currentStep;
-    static int numPatterns;
-    static int patternLengths[];
+    static bool poweredOn;
+    static uint8_t currentPattern;
+    static uint8_t currentStep;
+    static uint8_t numPatterns;
+    static uint8_t patternLengths[];
+    static void _switchPattern();
     static void _calculatePatternLengths();
 
 public:
     static void init();
     static void runPattern();
+    static void prevPattern();
     static void nextPattern();
-    static int getCurrentPattern();
-    static int getCurrentStep();
+    static void setPattern(uint8_t newPattern);
+    static void on();
+    static void off();
+    static uint8_t getCurrentPattern();
+    static uint8_t getCurrentStep();
     static void nextStep();
 };
 

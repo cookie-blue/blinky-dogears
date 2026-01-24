@@ -7,7 +7,7 @@
 bool FadePattern::fading = false;
 unsigned long FadePattern::fadeStartMillis = 0;
 
-void FadePattern::_start(const Step &currentPatternStep, int step)
+void FadePattern::_start(const Step &currentPatternStep, uint8_t step)
 {
     if (step == 0)
         log("fade pattern start");
@@ -15,7 +15,7 @@ void FadePattern::_start(const Step &currentPatternStep, int step)
     fading = true;
     fadeStartMillis = millis();
 
-    for (int i = 0; i < LED_COUNT; i++)
+    for (uint8_t i = 0; i < LED_COUNT; i++)
     {
         DUTY_TYPE startBrightness = ledcRead(ledPins[i]);
         DUTY_TYPE targetBrightness = currentPatternStep.leds[i];
@@ -25,8 +25,8 @@ void FadePattern::_start(const Step &currentPatternStep, int step)
 
 void FadePattern::run()
 {
-    int pattern = PatternManager::getCurrentPattern();
-    int step = PatternManager::getCurrentStep();
+    uint8_t pattern = PatternManager::getCurrentPattern();
+    uint8_t step = PatternManager::getCurrentStep();
     const Step currentPatternStep = patterns[pattern][step];
 
     if (!fading)

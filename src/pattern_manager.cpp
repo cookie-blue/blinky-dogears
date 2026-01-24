@@ -6,10 +6,11 @@
 
 #define NUM_PATTERNS sizeof(patterns) / sizeof(patterns[0])
 
-int PatternManager::currentPattern = 0;
-int PatternManager::currentStep = 0;
-int PatternManager::numPatterns = NUM_PATTERNS;
-int PatternManager::patternLengths[NUM_PATTERNS];
+bool PatternManager::poweredOn = true;
+uint8_t PatternManager::currentPattern = 0;
+uint8_t PatternManager::currentStep = 0;
+uint8_t PatternManager::numPatterns = NUM_PATTERNS;
+uint8_t PatternManager::patternLengths[NUM_PATTERNS];
 
 #define LED_COUNT 2
 
@@ -20,29 +21,74 @@ void PatternManager::init()
 
 void PatternManager::runPattern()
 {
+    if (!poweredOn)
+        return;
+
     if (patterns[currentPattern][currentStep].fade)
         FadePattern::run();
     else
         InstantPattern::run();
 }
 
-void PatternManager::nextPattern()
+void PatternManager::off()
 {
-    currentPattern = (currentPattern + 1) % numPatterns;
-    log("switching to pattern %d", currentPattern);
-    currentStep = 0;
+    if (!poweredOn)
+    {
+        log("already off");
+        return;
+    }
+
+    log("turning off");
+    poweredOn = false;
     InstantPattern::reset();
     FadePattern::reset();
-    for (int i = 0; i < LED_COUNT; i++)
+    for (uint8_t i = 0; i < LED_COUNT; i++)
         ledcWrite(ledPins[i], 0);
 }
 
-int PatternManager::getCurrentPattern()
+void PatternManager::on()
+{
+    if (poweredOn)
+    {
+        log("already on");
+        return;
+    }
+
+    log("turning on");
+    poweredOn = true;
+    InstantPattern::reset();
+    FadePattern::reset();
+}
+
+void PatternManager::prevPattern()
+{
+    currentPattern = (currentPattern - 1 + numPatterns) % numPatterns;
+    _switchPattern();
+}
+
+void PatternManager::nextPattern()
+{
+    currentPattern = (currentPattern + 1) % numPatterns;
+    _switchPattern();
+}
+
+void PatternManager::setPattern(uint8_t newPattern)
+{
+    if (newPattern >= numPatterns)
+    {
+        return;
+    }
+
+    currentPattern = newPattern;
+    _switchPattern();
+}
+
+uint8_t PatternManager::getCurrentPattern()
 {
     return currentPattern;
 }
 
-int PatternManager::getCurrentStep()
+uint8_t PatternManager::getCurrentStep()
 {
     return currentStep;
 }
@@ -52,12 +98,23 @@ void PatternManager::nextStep()
     currentStep = (currentStep + 1) % patternLengths[currentPattern];
 }
 
+void PatternManager::_switchPattern()
+{
+    log("switching to pattern %d", currentPattern);
+    poweredOn = true;
+    currentStep = 0;
+    InstantPattern::reset();
+    FadePattern::reset();
+    for (uint8_t i = 0; i < LED_COUNT; i++)
+        ledcWrite(ledPins[i], 0);
+}
+
 void PatternManager::_calculatePatternLengths()
 {
-    for (int pattern = 0; pattern < numPatterns; pattern++)
+    for (uint8_t pattern = 0; pattern < numPatterns; pattern++)
     {
-        int len = 0;
-        for (int step = 0; step < MAX_PATTERN_LENGTH; step++)
+        uint8_t len = 0;
+        for (uint8_t step = 0; step < MAX_PATTERN_LENGTH; step++)
         {
             if (patterns[pattern][step].duration == 0)
                 break;
