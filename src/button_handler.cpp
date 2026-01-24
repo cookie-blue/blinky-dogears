@@ -4,7 +4,6 @@
 
 bool ButtonHandler::buttonPressed = false;
 unsigned long ButtonHandler::lastDebounceTime = 0;
-const unsigned long ButtonHandler::DEBOUNCE_DELAY = 50; // milliseconds
 
 void ButtonHandler::check()
 {
@@ -12,7 +11,7 @@ void ButtonHandler::check()
 
     if (reading == LOW && !buttonPressed)
     {
-        if (millis() - lastDebounceTime > DEBOUNCE_DELAY)
+        if (millis() - lastDebounceTime > BUTTON_DEBOUNCE_DELAY)
         {
             buttonPressed = true;
             PatternManager::nextPattern();
@@ -21,7 +20,7 @@ void ButtonHandler::check()
     }
     else if (reading == HIGH)
     {
-        if (millis() - lastDebounceTime > DEBOUNCE_DELAY)
+        if (millis() - lastDebounceTime > BUTTON_DEBOUNCE_DELAY)
         {
             buttonPressed = false;
             lastDebounceTime = millis();

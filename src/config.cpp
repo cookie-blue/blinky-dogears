@@ -3,6 +3,7 @@
 // -- Pin Configuration ---
 const int ledPins[LED_COUNT] = {0, 1};
 const int buttonPin = 9;
+#define BUTTON_DEBOUNCE_DELAY 50
 
 // --- Patterns ---
 #define MAX_PATTERN_LENGTH 12
