@@ -28,7 +28,12 @@ void setup()
     for (int i = 0; i < LED_COUNT; i++)
         ledcAttach(ledPins[i], PWM_FREQUENCY, PWM_RESOLUTION);
 
-    pinMode(buttonPin, INPUT_PULLUP);
+    pinMode(BUTTON_PIN, INPUT_PULLUP);
+
+    #if STATUS_LED_PIN >= 0
+        pinMode(STATUS_LED_PIN, OUTPUT);
+        digitalWrite(STATUS_LED_PIN, HIGH);
+    #endif
 
     PatternManager::init();
     log("ready.");

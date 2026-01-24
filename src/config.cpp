@@ -2,8 +2,10 @@
 
 // -- Pin Configuration ---
 const int ledPins[LED_COUNT] = {0, 1};
-const int buttonPin = 9;
+#define STATUS_LED_PIN 8  // set to -1 to disable
+#define BUTTON_PIN 9
 #define BUTTON_DEBOUNCE_DELAY 50
+#define BUTTON_LONG_PRESS_DURATION 3000
 
 // --- Patterns ---
 #define MAX_PATTERN_LENGTH 12
