@@ -69,9 +69,25 @@ class CommandCallbacks : public NimBLECharacteristicCallbacks
         {
             PatternManager::on();
         }
-        else if (rx == "OFF")
+        else if (rx == "OFF" || rx == "0")
         {
             PatternManager::off();
+        }
+        else if (rx == "25")
+        {
+            PatternManager::override(64);
+        }
+        else if (rx == "50")
+        {
+            PatternManager::override(128);
+        }
+        else if (rx == "75")
+        {
+            PatternManager::override(192);
+        }
+        else if (rx == "100")
+        {
+            PatternManager::override(255);
         }
         else if (rx.length() > 1 && rx[0] == 'P')
         {
