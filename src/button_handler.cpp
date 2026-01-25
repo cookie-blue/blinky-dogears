@@ -1,6 +1,4 @@
 #include "button_handler.h"
-#include "config.cpp"
-#include "pattern_manager.h"
 
 bool ButtonHandler::buttonPressed = false;
 unsigned long ButtonHandler::lastDebounceTime = 0;

@@ -1,9 +1,6 @@
-#ifndef MAIN_H
-#define MAIN_H
+#pragma once
 
-#include <Arduino.h>
-
-#define LED_COUNT 2
+#include "config.h"
 
 struct Step
 {
@@ -11,7 +8,3 @@ struct Step
   unsigned int duration;   // milliseconds
   bool fade;               // true = fade, false = instant
 };
-
-void log(const char *format, ...);
-
-#endif

@@ -1,7 +1,4 @@
 #include "ble.h"
-#include "config.cpp"
-#include "pattern_manager.h"
-#include <NimBLEDevice.h>
 
 NimBLECharacteristic *bleCharacteristic;
 

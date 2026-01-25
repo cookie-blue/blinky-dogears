@@ -1,6 +1,9 @@
-#include "main.h"
+#pragma once
+
+#include <Arduino.h>
 
 // -- Pin Configuration ---
+#define LED_COUNT 2
 const uint8_t ledPins[LED_COUNT] = {0, 1};
 #define STATUS_LED_PIN 8  // comment out to disable
 #define BUTTON_PIN 9
@@ -15,6 +18,11 @@ const uint8_t ledPins[LED_COUNT] = {0, 1};
 
 // --- Patterns ---
 #define MAX_PATTERN_LENGTH 12
+
+// dont' worry about it
+#include "step.h"
+//
+
 const Step patterns[][MAX_PATTERN_LENGTH] = {
     // Pattern 1: Alternate blink 50%
     {{{128, 0}, 300, 0}, {{0, 128}, 300, 0}},

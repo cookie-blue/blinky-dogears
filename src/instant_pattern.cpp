@@ -1,6 +1,4 @@
 #include "instant_pattern.h"
-#include "pattern_manager.h"
-#include "config.cpp"
 
 unsigned long InstantPattern::previousMillis = 0;
 

@@ -1,5 +1,6 @@
-#ifndef BUTTON_HANDLER_H
-#define BUTTON_HANDLER_H
+#pragma once
+
+#include "pattern_manager.h"
 
 class ButtonHandler
 {
@@ -12,5 +13,3 @@ private:
 public:
   static void check();
 };
-
-#endif

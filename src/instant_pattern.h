@@ -1,7 +1,7 @@
-#ifndef INSTANT_PATTERN_H
-#define INSTANT_PATTERN_H
+#pragma once
 
-#include "main.h"
+#include "config.h"
+#include "pattern_manager.h"
 
 class InstantPattern
 {
@@ -12,5 +12,3 @@ public:
   static void run();
   static void reset();
 };
-
-#endif

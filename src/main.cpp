@@ -1,10 +1,4 @@
-#include "config.cpp"
-#include "fade_pattern.h"
-#include "instant_pattern.h"
-#include "button_handler.h"
-#include "pattern_manager.h"
-#include "ble.h"
-#include <cstdarg>
+#include "main.h"
 
 String get_id(){
   String id;

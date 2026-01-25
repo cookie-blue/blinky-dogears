@@ -19,7 +19,7 @@ The following Commands are Supported:
 * `+` Next Pattern (same as the physical button)
 * `-` Previous Pattern
 * `PX` Pattern X (`P1`, `P2`, `P3` etc.)
-* `BXX` Constant brightness XX% (gamma corrected) (`B10` = 10%, `B69` = 69% etc.) 
+* `BX` Constant brightness X% (gamma corrected) (`B10` = 10%, `B69` = 69% etc.) 
 * `OFF` Turn LEDs off
 * `ON` Turn LEDs on and resume Pattern
 

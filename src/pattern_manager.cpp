@@ -1,8 +1,4 @@
 #include "pattern_manager.h"
-#include "config.cpp"
-#include "instant_pattern.h"
-#include "fade_pattern.h"
-#include <cstdlib>
 
 #define NUM_PATTERNS sizeof(patterns) / sizeof(patterns[0])
 
@@ -11,8 +7,6 @@ uint8_t PatternManager::currentPattern = 0;
 uint8_t PatternManager::currentStep = 0;
 uint8_t PatternManager::numPatterns = NUM_PATTERNS;
 uint8_t PatternManager::patternLengths[NUM_PATTERNS];
-
-#define LED_COUNT 2
 
 void PatternManager::init()
 {

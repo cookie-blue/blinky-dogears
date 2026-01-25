@@ -1,6 +1,9 @@
-#ifndef PATTERN_MANAGER_H
-#define PATTERN_MANAGER_H
+#pragma once
 
+#include "pattern_manager.h"
+#include "instant_pattern.h"
+#include "fade_pattern.h"
+#include <cstdlib>
 #include <stdint.h>
 
 class PatternManager
@@ -27,5 +30,3 @@ public:
     static uint8_t getCurrentStep();
     static void nextStep();
 };
-
-#endif

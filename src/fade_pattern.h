@@ -1,7 +1,9 @@
-#ifndef FADE_PATTERN_H
-#define FADE_PATTERN_H
+#pragma once
 
+#include "config.h"
+#include "pattern_manager.h"
 #include "main.h"
+#include <cstdarg>
 
 class FadePattern
 {
@@ -15,5 +17,3 @@ public:
   static void run();
   static void reset();
 };
-
-#endif

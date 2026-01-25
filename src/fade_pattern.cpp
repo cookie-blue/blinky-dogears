@@ -1,8 +1,4 @@
 #include "fade_pattern.h"
-#include "pattern_manager.h"
-#include "main.h"
-#include "config.cpp"
-#include <cstdarg>
 
 bool FadePattern::fading = false;
 unsigned long FadePattern::fadeStartMillis = 0;
