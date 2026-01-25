@@ -20,12 +20,9 @@ const uint8_t ledPins[LED_COUNT] = {0, 1};
 #define BLE_CHARACTERISTIC_UUID "abcd1234-5678-90ab-cdef-1234567890ab"
 
 // --- Patterns ---
+#include "step.h"  // dont' worry about it. just leave it here.
+
 #define MAX_PATTERN_LENGTH 12
-
-// dont' worry about it
-#include "step.h"
-//
-
 const Step patterns[][MAX_PATTERN_LENGTH] = {
     // Pattern 1: Alternate blink 50%
     {{{128, 0}, 300, 0}, {{0, 128}, 300, 0}},

@@ -95,6 +95,7 @@ class CommandCallbacks : public NimBLECharacteristicCallbacks
 void BLE::init()
 {
     #ifndef ENABLE_BLE
+        Log::log("BLE is disabled in Configuration");
         return;
     #endif
     #ifdef BLE_NAME
