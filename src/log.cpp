@@ -13,4 +13,4 @@ void Log::log(const char *format, ...)
     Serial.println();
 
     va_end(args);
-};
+}

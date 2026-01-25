@@ -94,13 +94,13 @@ class CommandCallbacks : public NimBLECharacteristicCallbacks
 
 void BLE::init()
 {
-    #ifndef ENABLE_BLE
-        Log::log("BLE is disabled in Configuration");
-        return;
-    #endif
-    #ifdef BLE_NAME
-        char ble_name[] = BLE_NAME;
-    #else
+#ifndef ENABLE_BLE
+    Log::log("BLE is disabled in Configuration");
+    return;
+#endif
+#ifdef BLE_NAME
+    char ble_name[] = BLE_NAME;
+#else
     uint32_t chipid = ESP.getEfuseMac();
     char ble_name[7 + 13 + 1];
     snprintf(ble_name, (7 + 13 + 1), "Blinky %08X", (uint32_t)chipid);

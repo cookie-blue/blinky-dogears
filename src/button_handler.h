@@ -7,11 +7,11 @@
 class ButtonHandler
 {
 private:
-  static bool _buttonPressed;
-  static unsigned long _lastDebounceTime;
-  static unsigned long _pressStartTime;
-  static bool _longPressHandled;
+    static bool _buttonPressed;
+    static unsigned long _lastDebounceTime;
+    static unsigned long _pressStartTime;
+    static bool _longPressHandled;
 
 public:
-  static void check();
+    static void check();
 };

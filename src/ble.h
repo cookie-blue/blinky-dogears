@@ -7,7 +7,8 @@
 class BLE
 {
 private:
-  static NimBLECharacteristic *_bleCharacteristic;
+    static NimBLECharacteristic *_bleCharacteristic;
+
 public:
-  static void init();
+    static void init();
 };

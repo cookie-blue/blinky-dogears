@@ -7,9 +7,9 @@
 class InstantPattern
 {
 private:
-  static unsigned long _previousMillis;
+    static unsigned long _previousMillis;
 
 public:
-  static void run();
-  static void reset();
+    static void run();
+    static void reset();
 };

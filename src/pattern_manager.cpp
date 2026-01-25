@@ -58,7 +58,6 @@ void PatternManager::override(uint8_t brightness)
         LED::write(ledPins[i], brightness);
 }
 
-
 void PatternManager::prevPattern()
 {
     PatternManager::_currentPattern = (PatternManager::_currentPattern - 1 + PatternManager::_numPatterns) % PatternManager::_numPatterns;
