@@ -13,8 +13,9 @@ void Indicator::init()
         pinMode(STATUS_LED_PIN, OUTPUT);
         digitalWrite(STATUS_LED_PIN, (STATUS_LED_INVERTED ? HIGH : LOW));
         Log::log("Indicator LED on pin %d is now %d", STATUS_LED_PIN, (STATUS_LED_INVERTED ? HIGH : LOW));
+    #else
+        Log::log("Indicator LED is disabled in Configuration");
     #endif
-    Log::log("Indicator LED is disabled in Configuration");
 }
 
 void Indicator::blink(uint8_t count, unsigned int duration)
