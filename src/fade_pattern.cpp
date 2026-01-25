@@ -33,8 +33,7 @@ void FadePattern::run()
     for (uint8_t i = 0; i < LED_COUNT; i++)
     {
         uint8_t brightness = startBrightness[i] + (targetBrightness[i] - startBrightness[i]) * min(progress, 1.0f);
-        DUTY_TYPE gammaValue = PGM_READ_DUTY(&gammaMap[brightness]);
-        ledcWrite(ledPins[i], gammaValue);
+        LED::write(ledPins[i], brightness);
     }
 
     if (millis() - fadeStartMillis >= currentPatternStep.duration)

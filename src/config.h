@@ -5,7 +5,10 @@
 // -- Pin Configuration ---
 #define LED_COUNT 2
 const uint8_t ledPins[LED_COUNT] = {0, 1};
+
 #define STATUS_LED_PIN 8  // comment out to disable
+
+
 #define BUTTON_PIN 9
 #define BUTTON_DEBOUNCE_DELAY 50
 #define BUTTON_LONG_PRESS_DURATION 3000

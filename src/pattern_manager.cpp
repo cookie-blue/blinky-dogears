@@ -31,7 +31,7 @@ void PatternManager::off()
     InstantPattern::reset();
     FadePattern::reset();
     for (uint8_t i = 0; i < LED_COUNT; i++)
-        ledcWrite(ledPins[i], 0);
+        LED::write(ledPins[i], 0);
 }
 
 void PatternManager::on()
@@ -54,9 +54,8 @@ void PatternManager::override(uint8_t brightness)
     InstantPattern::reset();
     FadePattern::reset();
 
-    DUTY_TYPE gammaValue = PGM_READ_DUTY(&gammaMap[brightness]);
     for (uint8_t i = 0; i < LED_COUNT; i++)
-        ledcWrite(ledPins[i], gammaValue);
+        LED::write(ledPins[i], brightness);
 }
 
 
@@ -106,7 +105,7 @@ void PatternManager::_switchPattern()
     InstantPattern::reset();
     FadePattern::reset();
     for (uint8_t i = 0; i < LED_COUNT; i++)
-        ledcWrite(ledPins[i], 0);
+        LED::write(ledPins[i], 0);
 }
 
 void PatternManager::_calculatePatternLengths()

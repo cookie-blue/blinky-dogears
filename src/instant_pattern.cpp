@@ -19,8 +19,7 @@ void InstantPattern::run()
     for (uint8_t i = 0; i < LED_COUNT; i++)
     {
         uint8_t brightness = currentPatternStep.leds[i];
-        DUTY_TYPE gammaValue = PGM_READ_DUTY(&gammaMap[brightness]);
-        ledcWrite(ledPins[i], gammaValue);
+        LED::write(ledPins[i], brightness);
     }
 
     PatternManager::nextStep();
