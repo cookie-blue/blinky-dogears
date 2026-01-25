@@ -9,8 +9,10 @@
 class FadePattern
 {
 private:
-  static bool fading;
-  static unsigned long fadeStartMillis;
+  static bool _fading;
+  static unsigned long _fadeStartMillis;
+  static uint8_t _startBrightness[LED_COUNT];
+  static uint8_t _targetBrightness[LED_COUNT];
 
   static void _start(const Step &currentPatternStep);
 

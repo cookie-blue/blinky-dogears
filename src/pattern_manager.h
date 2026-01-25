@@ -9,11 +9,11 @@
 class PatternManager
 {
 private:
-    static bool poweredOn;
-    static uint8_t currentPattern;
-    static uint8_t currentStep;
-    static uint8_t numPatterns;
-    static uint8_t patternLengths[];
+    static bool _poweredOn;
+    static uint8_t _currentPattern;
+    static uint8_t _currentStep;
+    static uint8_t _numPatterns;
+    static uint8_t _patternLengths[];
     static void _switchPattern();
     static void _calculatePatternLengths();
 

@@ -1,21 +1,21 @@
 #include "fade_pattern.h"
 
-bool FadePattern::fading = false;
-unsigned long FadePattern::fadeStartMillis = 0;
-uint8_t startBrightness[LED_COUNT];
-uint8_t targetBrightness[LED_COUNT];
+bool FadePattern::_fading = false;
+unsigned long FadePattern::_fadeStartMillis = 0;
+uint8_t FadePattern::_startBrightness[LED_COUNT];
+uint8_t FadePattern::_targetBrightness[LED_COUNT];
 
 void FadePattern::_start(const Step &currentPatternStep)
 {
     Log::log("fade pattern start");
 
-    fading = true;
-    fadeStartMillis = millis();
+    FadePattern::_fading = true;
+    FadePattern::_fadeStartMillis = millis();
 
     for (uint8_t i = 0; i < LED_COUNT; i++)
     {
-        startBrightness[i] = ledcRead(ledPins[i]);
-        targetBrightness[i] = currentPatternStep.leds[i];
+        FadePattern::_startBrightness[i] = ledcRead(ledPins[i]);
+        FadePattern::_targetBrightness[i] = currentPatternStep.leds[i];
     }
 }
 
@@ -25,26 +25,26 @@ void FadePattern::run()
     uint8_t step = PatternManager::getCurrentStep();
     const Step currentPatternStep = patterns[pattern][step];
 
-    if (!fading)
-        _start(currentPatternStep);
+    if (!FadePattern::_fading)
+        FadePattern::_start(currentPatternStep);
 
-    float progress = float(millis() - fadeStartMillis) / currentPatternStep.duration;
+    float progress = float(millis() - FadePattern::_fadeStartMillis) / currentPatternStep.duration;
 
     for (uint8_t i = 0; i < LED_COUNT; i++)
     {
-        uint8_t brightness = startBrightness[i] + (targetBrightness[i] - startBrightness[i]) * min(progress, 1.0f);
+        uint8_t brightness = FadePattern::_startBrightness[i] + (FadePattern::_targetBrightness[i] - FadePattern::_startBrightness[i]) * min(progress, 1.0f);
         LED::write(ledPins[i], brightness);
     }
 
-    if (millis() - fadeStartMillis >= currentPatternStep.duration)
+    if (millis() - FadePattern::_fadeStartMillis >= currentPatternStep.duration)
     {
-        fading = false;
+        FadePattern::_fading = false;
         PatternManager::nextStep();
     }
 }
 
 void FadePattern::reset()
 {
-    fading = false;
-    fadeStartMillis = millis();
+    FadePattern::_fading = false;
+    FadePattern::_fadeStartMillis = millis();
 }

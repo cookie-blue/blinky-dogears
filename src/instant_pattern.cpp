@@ -1,6 +1,6 @@
 #include "instant_pattern.h"
 
-unsigned long InstantPattern::previousMillis = 0;
+unsigned long InstantPattern::_previousMillis = 0;
 
 void InstantPattern::run()
 {
@@ -8,13 +8,13 @@ void InstantPattern::run()
     uint8_t step = PatternManager::getCurrentStep();
     const Step currentPatternStep = patterns[pattern][step];
 
-    if (millis() - previousMillis < currentPatternStep.duration)
+    if (millis() - InstantPattern::_previousMillis < currentPatternStep.duration)
         return;
 
     if (step == 0)
         Log::log("instant pattern start");
 
-    previousMillis = millis();
+    InstantPattern::_previousMillis = millis();
 
     for (uint8_t i = 0; i < LED_COUNT; i++)
     {
@@ -27,5 +27,5 @@ void InstantPattern::run()
 
 void InstantPattern::reset()
 {
-    previousMillis = millis();
+    InstantPattern::_previousMillis = millis();
 }

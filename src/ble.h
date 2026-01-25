@@ -6,6 +6,8 @@
 
 class BLE
 {
+private:
+  static NimBLECharacteristic *_bleCharacteristic;
 public:
   static void init();
 };

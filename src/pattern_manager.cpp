@@ -2,11 +2,11 @@
 
 #define NUM_PATTERNS sizeof(patterns) / sizeof(patterns[0])
 
-bool PatternManager::poweredOn = true;
-uint8_t PatternManager::currentPattern = 0;
-uint8_t PatternManager::currentStep = 0;
-uint8_t PatternManager::numPatterns = NUM_PATTERNS;
-uint8_t PatternManager::patternLengths[NUM_PATTERNS];
+bool PatternManager::_poweredOn = true;
+uint8_t PatternManager::_currentPattern = 0;
+uint8_t PatternManager::_currentStep = 0;
+uint8_t PatternManager::_numPatterns = NUM_PATTERNS;
+uint8_t PatternManager::_patternLengths[NUM_PATTERNS];
 
 void PatternManager::init()
 {
@@ -15,10 +15,10 @@ void PatternManager::init()
 
 void PatternManager::runPattern()
 {
-    if (!poweredOn)
+    if (!PatternManager::_poweredOn)
         return;
 
-    if (patterns[currentPattern][currentStep].fade)
+    if (patterns[PatternManager::_currentPattern][PatternManager::_currentStep].fade)
         FadePattern::run();
     else
         InstantPattern::run();
@@ -27,7 +27,7 @@ void PatternManager::runPattern()
 void PatternManager::off()
 {
     Log::log("turning off");
-    poweredOn = false;
+    PatternManager::_poweredOn = false;
     InstantPattern::reset();
     FadePattern::reset();
     for (uint8_t i = 0; i < LED_COUNT; i++)
@@ -36,21 +36,21 @@ void PatternManager::off()
 
 void PatternManager::on()
 {
-    if (poweredOn)
+    if (PatternManager::_poweredOn)
     {
         Log::log("already on");
         return;
     }
 
     Log::log("turning on");
-    poweredOn = true;
+    PatternManager::_poweredOn = true;
     InstantPattern::reset();
     FadePattern::reset();
 }
 
 void PatternManager::override(uint8_t brightness)
 {
-    poweredOn = false;
+    PatternManager::_poweredOn = false;
     InstantPattern::reset();
     FadePattern::reset();
 
@@ -61,47 +61,47 @@ void PatternManager::override(uint8_t brightness)
 
 void PatternManager::prevPattern()
 {
-    currentPattern = (currentPattern - 1 + numPatterns) % numPatterns;
-    _switchPattern();
+    PatternManager::_currentPattern = (PatternManager::_currentPattern - 1 + PatternManager::_numPatterns) % PatternManager::_numPatterns;
+    PatternManager::_switchPattern();
 }
 
 void PatternManager::nextPattern()
 {
-    currentPattern = (currentPattern + 1) % numPatterns;
-    _switchPattern();
+    PatternManager::_currentPattern = (PatternManager::_currentPattern + 1) % PatternManager::_numPatterns;
+    PatternManager::_switchPattern();
 }
 
 void PatternManager::setPattern(uint8_t newPattern)
 {
-    if (newPattern >= numPatterns)
+    if (newPattern >= PatternManager::_numPatterns)
     {
         return;
     }
 
-    currentPattern = newPattern;
-    _switchPattern();
+    PatternManager::_currentPattern = newPattern;
+    PatternManager::_switchPattern();
 }
 
 uint8_t PatternManager::getCurrentPattern()
 {
-    return currentPattern;
+    return PatternManager::_currentPattern;
 }
 
 uint8_t PatternManager::getCurrentStep()
 {
-    return currentStep;
+    return PatternManager::_currentStep;
 }
 
 void PatternManager::nextStep()
 {
-    currentStep = (currentStep + 1) % patternLengths[currentPattern];
+    PatternManager::_currentStep = (PatternManager::_currentStep + 1) % PatternManager::_patternLengths[PatternManager::_currentPattern];
 }
 
 void PatternManager::_switchPattern()
 {
-    Log::log("switching to pattern %d", currentPattern);
-    poweredOn = true;
-    currentStep = 0;
+    Log::log("switching to pattern %d", PatternManager::_currentPattern);
+    PatternManager::_poweredOn = true;
+    PatternManager::_currentStep = 0;
     InstantPattern::reset();
     FadePattern::reset();
     for (uint8_t i = 0; i < LED_COUNT; i++)
@@ -110,7 +110,7 @@ void PatternManager::_switchPattern()
 
 void PatternManager::_calculatePatternLengths()
 {
-    for (uint8_t pattern = 0; pattern < numPatterns; pattern++)
+    for (uint8_t pattern = 0; pattern < PatternManager::_numPatterns; pattern++)
     {
         uint8_t len = 0;
         for (uint8_t step = 0; step < MAX_PATTERN_LENGTH; step++)
@@ -119,6 +119,6 @@ void PatternManager::_calculatePatternLengths()
                 break;
             len++;
         }
-        patternLengths[pattern] = len;
+        PatternManager::_patternLengths[pattern] = len;
     }
 }

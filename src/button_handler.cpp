@@ -1,43 +1,43 @@
 #include "button_handler.h"
 
-bool ButtonHandler::buttonPressed = false;
-unsigned long ButtonHandler::lastDebounceTime = 0;
-unsigned long ButtonHandler::pressStartTime = 0;
-bool ButtonHandler::longPressHandled = false;
+bool ButtonHandler::_buttonPressed = false;
+unsigned long ButtonHandler::_lastDebounceTime = 0;
+unsigned long ButtonHandler::_pressStartTime = 0;
+bool ButtonHandler::_longPressHandled = false;
 
 void ButtonHandler::check()
 {
     uint8_t reading = digitalRead(BUTTON_PIN);
 
-    if (reading == LOW && !buttonPressed)
+    if (reading == LOW && !ButtonHandler::_buttonPressed)
     {
-        if (millis() - lastDebounceTime > BUTTON_DEBOUNCE_DELAY)
+        if (millis() - ButtonHandler::_lastDebounceTime > BUTTON_DEBOUNCE_DELAY)
         {
-            buttonPressed = true;
-            pressStartTime = millis();
-            longPressHandled = false;
+            ButtonHandler::_buttonPressed = true;
+            ButtonHandler::_pressStartTime = millis();
+            ButtonHandler::_longPressHandled = false;
             PatternManager::nextPattern();
-            lastDebounceTime = millis();
+            ButtonHandler::_lastDebounceTime = millis();
         }
     }
-    else if (reading == LOW && buttonPressed)
+    else if (reading == LOW && ButtonHandler::_buttonPressed)
     {
         // Button is still pressed - check for long press
-        unsigned long pressDuration = millis() - pressStartTime;
-        if (pressDuration >= BUTTON_LONG_PRESS_DURATION && !longPressHandled)
+        unsigned long pressDuration = millis() - ButtonHandler::_pressStartTime;
+        if (pressDuration >= BUTTON_LONG_PRESS_DURATION && !ButtonHandler::_longPressHandled)
         {
             Log::log("Long press detected: %lu ms", pressDuration);
             Indicator::blink(1, 100);
 
-            longPressHandled = true;
+            _longPressHandled = true;
         }
     }
     else if (reading == HIGH)
     {
-        if (millis() - lastDebounceTime > BUTTON_DEBOUNCE_DELAY)
+        if (millis() - _lastDebounceTime > BUTTON_DEBOUNCE_DELAY)
         {
-            buttonPressed = false;
-            lastDebounceTime = millis();
+            ButtonHandler::_buttonPressed = false;
+            ButtonHandler::_lastDebounceTime = millis();
         }
     }
 }

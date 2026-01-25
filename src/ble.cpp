@@ -1,6 +1,6 @@
 #include "ble.h"
 
-NimBLECharacteristic *bleCharacteristic;
+NimBLECharacteristic *BLE::_bleCharacteristic;
 
 class ServerCallbacks : public NimBLEServerCallbacks
 {
@@ -112,14 +112,14 @@ void BLE::init()
 
     NimBLEService *bleService = bleServer->createService(BLE_SERVICE_UUID);
 
-    bleCharacteristic = bleService->createCharacteristic(
+    BLE::_bleCharacteristic = bleService->createCharacteristic(
         BLE_CHARACTERISTIC_UUID,
         NIMBLE_PROPERTY::WRITE |
             NIMBLE_PROPERTY::READ |
             NIMBLE_PROPERTY::NOTIFY);
 
-    bleCharacteristic->setCallbacks(new CommandCallbacks());
-    bleCharacteristic->setValue("READY");
+    BLE::_bleCharacteristic->setCallbacks(new CommandCallbacks());
+    BLE::_bleCharacteristic->setValue("READY");
 
     bleService->start();
 
