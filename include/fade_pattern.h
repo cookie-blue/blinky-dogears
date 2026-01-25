@@ -9,7 +9,7 @@ private:
   static bool fading;
   static unsigned long fadeStartMillis;
 
-  static void _start(const Step &currentPatternStep, uint8_t step);
+  static void _start(const Step &currentPatternStep);
 
 public:
   static void run();

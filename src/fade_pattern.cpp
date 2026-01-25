@@ -6,20 +6,20 @@
 
 bool FadePattern::fading = false;
 unsigned long FadePattern::fadeStartMillis = 0;
+uint8_t startBrightness[LED_COUNT];
+uint8_t targetBrightness[LED_COUNT];
 
-void FadePattern::_start(const Step &currentPatternStep, uint8_t step)
+void FadePattern::_start(const Step &currentPatternStep)
 {
-    if (step == 0)
-        log("fade pattern start");
+    log("fade pattern start");
 
     fading = true;
     fadeStartMillis = millis();
 
     for (uint8_t i = 0; i < LED_COUNT; i++)
     {
-        DUTY_TYPE startBrightness = ledcRead(ledPins[i]);
-        DUTY_TYPE targetBrightness = currentPatternStep.leds[i];
-        ledcFade(ledPins[i], startBrightness, targetBrightness, currentPatternStep.duration);
+        startBrightness[i] = ledcRead(ledPins[i]);
+        targetBrightness[i] = currentPatternStep.leds[i];
     }
 }
 
@@ -30,7 +30,16 @@ void FadePattern::run()
     const Step currentPatternStep = patterns[pattern][step];
 
     if (!fading)
-        _start(currentPatternStep, step);
+        _start(currentPatternStep);
+
+    float progress = float(millis() - fadeStartMillis) / currentPatternStep.duration;
+
+    for (uint8_t i = 0; i < LED_COUNT; i++)
+    {
+        uint8_t brightness = startBrightness[i] + (targetBrightness[i] - startBrightness[i]) * min(progress, 1.0f);
+        DUTY_TYPE gammaValue = PGM_READ_DUTY(&gammaMap[brightness]);
+        ledcWrite(ledPins[i], gammaValue);
+    }
 
     if (millis() - fadeStartMillis >= currentPatternStep.duration)
     {
