@@ -26,16 +26,10 @@ void setup()
 
     pinMode(BUTTON_PIN, INPUT_PULLUP);
 
-    #ifdef STATUS_LED_PIN
-        pinMode(STATUS_LED_PIN, OUTPUT);
-        digitalWrite(STATUS_LED_PIN, HIGH);
-    #endif
+    Indicator::init();
 
     PatternManager::init();
-
-    #ifdef ENABLE_BLE
-        BLE::init();
-    #endif
+    BLE::init();
 
     Log::log("ready.");
 }
@@ -44,4 +38,5 @@ void loop()
 {
     ButtonHandler::check();
     PatternManager::runPattern();
+    Indicator::run();
 }

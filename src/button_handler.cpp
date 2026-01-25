@@ -27,12 +27,8 @@ void ButtonHandler::check()
         if (pressDuration >= BUTTON_LONG_PRESS_DURATION && !longPressHandled)
         {
             Log::log("Long press detected: %lu ms", pressDuration);
+            Indicator::blink(1, 100);
 
-            #ifdef SATUS_LED_PIN
-                digitalWrite(STATUS_LED_PIN, LOW);
-                delay(100);
-                digitalWrite(STATUS_LED_PIN, HIGH);
-            #endif
             longPressHandled = true;
         }
     }

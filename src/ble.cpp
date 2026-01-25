@@ -7,29 +7,13 @@ class ServerCallbacks : public NimBLEServerCallbacks
     void onConnect(NimBLEServer *bleServer, NimBLEConnInfo &connInfo) override
     {
         Log::log("Client %s connected", connInfo.getAddress().toString().c_str());
-        #ifdef STATUS_LED_PIN
-            for (uint8_t i = 0; i < 2; i++)
-            {
-                digitalWrite(STATUS_LED_PIN, LOW);
-                delay(50);
-                digitalWrite(STATUS_LED_PIN, HIGH);
-                delay(50);
-            }
-        #endif
+        Indicator::blink(2, 50, 50);
     }
 
     void onDisconnect(NimBLEServer *bleServer, NimBLEConnInfo &connInfo, int reason) override
     {
         Log::log("Client %s disconnected. Reason %d", connInfo.getAddress().toString().c_str(), reason);
-        #ifdef STATUS_LED_PIN
-            for (uint8_t i = 0; i < 3; i++)
-            {
-                digitalWrite(STATUS_LED_PIN, LOW);
-                delay(50);
-                digitalWrite(STATUS_LED_PIN, HIGH);
-                delay(50);
-            }
-        #endif
+        Indicator::blink(3, 50, 50);
         NimBLEDevice::startAdvertising();
     }
 };
@@ -41,12 +25,7 @@ class CommandCallbacks : public NimBLECharacteristicCallbacks
         std::string rx = bleCharacteristic->getValue();
 
         Log::log("Received command: %s", rx.c_str());
-
-        #ifdef STATUS_LED_PIN
-            digitalWrite(STATUS_LED_PIN, LOW);
-            delay(50);
-            digitalWrite(STATUS_LED_PIN, HIGH);
-        #endif
+        Indicator::blink(1, 50);
 
         if (rx == "PING")
         {
@@ -115,9 +94,12 @@ class CommandCallbacks : public NimBLECharacteristicCallbacks
 
 void BLE::init()
 {
-#ifdef BLE_NAME
-    char ble_name[] = BLE_NAME;
-#else
+    #ifndef ENABLE_BLE
+        return;
+    #endif
+    #ifdef BLE_NAME
+        char ble_name[] = BLE_NAME;
+    #else
     uint32_t chipid = ESP.getEfuseMac();
     char ble_name[7 + 13 + 1];
     snprintf(ble_name, (7 + 13 + 1), "Blinky %08X", (uint32_t)chipid);

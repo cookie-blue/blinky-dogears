@@ -7,7 +7,7 @@
 const uint8_t ledPins[LED_COUNT] = {0, 1};
 
 #define STATUS_LED_PIN 8  // comment out to disable
-
+#define STATUS_LED_INVERTED true
 
 #define BUTTON_PIN 9
 #define BUTTON_DEBOUNCE_DELAY 50

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "indicator.h"
 #include "pattern_manager.h"
 #include "log.h"
 
