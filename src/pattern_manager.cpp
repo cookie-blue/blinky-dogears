@@ -26,7 +26,7 @@ void PatternManager::runPattern()
 
 void PatternManager::off()
 {
-    log("turning off");
+    Log::log("turning off");
     poweredOn = false;
     InstantPattern::reset();
     FadePattern::reset();
@@ -38,11 +38,11 @@ void PatternManager::on()
 {
     if (poweredOn)
     {
-        log("already on");
+        Log::log("already on");
         return;
     }
 
-    log("turning on");
+    Log::log("turning on");
     poweredOn = true;
     InstantPattern::reset();
     FadePattern::reset();
@@ -100,7 +100,7 @@ void PatternManager::nextStep()
 
 void PatternManager::_switchPattern()
 {
-    log("switching to pattern %d", currentPattern);
+    Log::log("switching to pattern %d", currentPattern);
     poweredOn = true;
     currentStep = 0;
     InstantPattern::reset();

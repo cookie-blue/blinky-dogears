@@ -20,7 +20,7 @@ void setup()
 
     delay(1000);
 
-    log("setting up pins...");
+    Log::log("setting up pins...");
     for (uint8_t i = 0; i < LED_COUNT; i++)
     ledcAttach(ledPins[i], PWM_FREQUENCY, PWM_RESOLUTION);
 
@@ -37,26 +37,11 @@ void setup()
         BLE::init();
     #endif
 
-    log("ready.");
+    Log::log("ready.");
 }
 
 void loop()
 {
     ButtonHandler::check();
     PatternManager::runPattern();
-}
-
-void log(const char *format, ...)
-{
-    va_list args;
-    va_start(args, format);
-
-    uint8_t pattern = PatternManager::getCurrentPattern();
-    float time = millis() / 1000.0;
-
-    Serial.printf("[%6.1f][%d] ", time, pattern);
-    Serial.vprintf(format, args);
-    Serial.println();
-
-    va_end(args);
 }

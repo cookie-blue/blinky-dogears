@@ -6,7 +6,7 @@ class ServerCallbacks : public NimBLEServerCallbacks
 {
     void onConnect(NimBLEServer *bleServer, NimBLEConnInfo &connInfo) override
     {
-        log("Client %s connected", connInfo.getAddress().toString().c_str());
+        Log::log("Client %s connected", connInfo.getAddress().toString().c_str());
         #ifdef STATUS_LED_PIN
             for (uint8_t i = 0; i < 2; i++)
             {
@@ -20,7 +20,7 @@ class ServerCallbacks : public NimBLEServerCallbacks
 
     void onDisconnect(NimBLEServer *bleServer, NimBLEConnInfo &connInfo, int reason) override
     {
-        log("Client %s disconnected. Reason %d", connInfo.getAddress().toString().c_str(), reason);
+        Log::log("Client %s disconnected. Reason %d", connInfo.getAddress().toString().c_str(), reason);
         #ifdef STATUS_LED_PIN
             for (uint8_t i = 0; i < 3; i++)
             {
@@ -40,7 +40,7 @@ class CommandCallbacks : public NimBLECharacteristicCallbacks
     {
         std::string rx = bleCharacteristic->getValue();
 
-        log("Received command: %s", rx.c_str());
+        Log::log("Received command: %s", rx.c_str());
 
         #ifdef STATUS_LED_PIN
             digitalWrite(STATUS_LED_PIN, LOW);
@@ -50,7 +50,7 @@ class CommandCallbacks : public NimBLECharacteristicCallbacks
 
         if (rx == "PING")
         {
-            log("PING received");
+            Log::log("PING received");
             bleCharacteristic->setValue("PONG");
             bleCharacteristic->notify();
         }
@@ -82,7 +82,7 @@ class CommandCallbacks : public NimBLECharacteristicCallbacks
         }
         else
         {
-            log("Unknown command!");
+            Log::log("Unknown command!");
         }
 
         std::string response = "P" + std::to_string(PatternManager::getCurrentPattern());
@@ -96,19 +96,19 @@ class CommandCallbacks : public NimBLECharacteristicCallbacks
 
         if (subValue == 0)
         {
-            log("BLE Client %s Unsubscribed", address.c_str());
+            Log::log("BLE Client %s Unsubscribed", address.c_str());
         }
         if (subValue == 1)
         {
-            log("BLE Client %s Subscribed to notifications", address.c_str());
+            Log::log("BLE Client %s Subscribed to notifications", address.c_str());
         }
         if (subValue == 2)
         {
-            log("BLE Client %s Subscribed to indications", address.c_str());
+            Log::log("BLE Client %s Subscribed to indications", address.c_str());
         }
         if (subValue == 3)
         {
-            log("BLE Client %s Subscribed to notifications and indications", address.c_str());
+            Log::log("BLE Client %s Subscribed to notifications and indications", address.c_str());
         }
     }
 };
@@ -122,7 +122,7 @@ void BLE::init()
     char ble_name[7 + 13 + 1];
     snprintf(ble_name, (7 + 13 + 1), "Blinky %08X", (uint32_t)chipid);
 #endif
-    log("using BLE device name '%s'", ble_name);
+    Log::log("using BLE device name '%s'", ble_name);
     NimBLEDevice::init(ble_name);
 
     NimBLEServer *bleServer = NimBLEDevice::createServer();
@@ -150,5 +150,5 @@ void BLE::init()
 
     bleAdvertising->start();
 
-    log("BLE ready, waiting for connection...");
+    Log::log("BLE ready, waiting for connection...");
 }

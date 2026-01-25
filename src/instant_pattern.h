@@ -1,6 +1,7 @@
 #pragma once
 
 #include "config.h"
+#include "log.h"
 #include "pattern_manager.h"
 
 class InstantPattern

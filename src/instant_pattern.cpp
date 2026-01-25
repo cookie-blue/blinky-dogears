@@ -12,7 +12,7 @@ void InstantPattern::run()
         return;
 
     if (step == 0)
-        log("instant pattern start");
+        Log::log("instant pattern start");
 
     previousMillis = millis();
 

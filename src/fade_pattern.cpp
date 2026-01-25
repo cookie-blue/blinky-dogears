@@ -7,7 +7,7 @@ uint8_t targetBrightness[LED_COUNT];
 
 void FadePattern::_start(const Step &currentPatternStep)
 {
-    log("fade pattern start");
+    Log::log("fade pattern start");
 
     fading = true;
     fadeStartMillis = millis();

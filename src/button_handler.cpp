@@ -26,7 +26,7 @@ void ButtonHandler::check()
         unsigned long pressDuration = millis() - pressStartTime;
         if (pressDuration >= BUTTON_LONG_PRESS_DURATION && !longPressHandled)
         {
-            log("Long press detected: %lu ms", pressDuration);
+            Log::log("Long press detected: %lu ms", pressDuration);
 
             #ifdef SATUS_LED_PIN
                 digitalWrite(STATUS_LED_PIN, LOW);

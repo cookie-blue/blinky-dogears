@@ -1,6 +1,7 @@
 #pragma once
 
 #include "pattern_manager.h"
+#include "log.h"
 
 class ButtonHandler
 {
