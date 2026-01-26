@@ -38,7 +38,7 @@ const Step patterns[][MAX_PATTERN_LENGTH] = {
 };
 
 // --- PWM Configuration ---
-#define PWM_FREQUENCY 5000
+#define PWM_FREQUENCY 9784
 #define PWM_RESOLUTION 12
 #define DUTY_TYPE uint16_t
 #define PGM_READ_DUTY(addr) pgm_read_word(addr)
