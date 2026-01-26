@@ -19,6 +19,18 @@ const uint8_t ledPins[LED_COUNT] = {0, 1};
 #define BLE_SERVICE_UUID "12345678-1234-1234-1234-1234567890ab"
 #define BLE_CHARACTERISTIC_UUID "abcd1234-5678-90ab-cdef-1234567890ab"
 
+// --- OTA WiFi Configuration ---
+#define ENABLE_OTA
+#define OTA_BOOT_TIMEOUT 3000
+// #define OTA_WIFI_SSID "blinky"
+#define OTA_WIFI_PASSWORD "blinkySecure"
+#define OTA_WIFI_CHANNEL 1
+#define OTA_WIFI_AUTH_MODE WIFI_AUTH_WPA3_PSK
+#define OTA_WIFI_CIPHER WIFI_CIPHER_TYPE_AES_GMAC256
+// #define OTA_WIFI_AUTH_MODE WIFI_AUTH_WPA2_PSK
+// #define OTA_WIFI_CIPHER WIFI_CIPHER_TYPE_CCMP
+#define MDNS_NAME "blinky"
+
 // --- Patterns ---
 #include "step.h"  // dont' worry about it. just leave it here.
 

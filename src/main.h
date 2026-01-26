@@ -6,3 +6,4 @@
 #include "instant_pattern.h"
 #include "button_handler.h"
 #include "ble.h"
+#include "ota.h"

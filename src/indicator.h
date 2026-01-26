@@ -17,5 +17,8 @@ public:
     static void init();
     static void blink(uint8_t count, unsigned int duration);
     static void blink(uint8_t count, unsigned int durationOn, unsigned int durationOff);
+    static void on();
+    static void off();
+    static void set(uint8_t state);
     static void run();
 };

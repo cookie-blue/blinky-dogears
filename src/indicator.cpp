@@ -36,6 +36,23 @@ void Indicator::blink(uint8_t count, unsigned int durationOn, unsigned int durat
 #endif
 }
 
+void Indicator::on()
+{
+    Indicator::set(HIGH);
+}
+
+void Indicator::off()
+{
+    Indicator::set(LOW);
+}
+
+void Indicator::set(uint8_t state)
+{
+    Indicator::_isOn = state;
+    state = (STATUS_LED_INVERTED ? !state : state);
+    digitalWrite(STATUS_LED_PIN, state);
+}
+
 void Indicator::run()
 {
 #ifdef STATUS_LED_PIN
@@ -49,9 +66,7 @@ void Indicator::run()
     if (_isOn)
         _count--;
 
-    bool newStatus = (STATUS_LED_INVERTED ? _isOn : !_isOn);
-    digitalWrite(STATUS_LED_PIN, (newStatus ? HIGH : LOW));
-    _isOn = !_isOn;
+    Indicator::set(!_isOn);
 
     _previousMillis = millis();
 

@@ -28,6 +28,18 @@ void setup()
 
     Indicator::init();
 
+    Indicator::on();
+    while (millis() < OTA_BOOT_TIMEOUT)
+    {
+        if (digitalRead(BUTTON_PIN) == LOW)
+        {
+            Indicator::off();
+            OTA::init();
+            return;
+        }
+    }
+    Indicator::off();
+
     PatternManager::init();
     BLE::init();
 
@@ -36,7 +48,14 @@ void setup()
 
 void loop()
 {
-    ButtonHandler::check();
-    PatternManager::runPattern();
+    if (OTA::isReady())
+    {
+        OTA::handle();
+    }
+    else
+    {
+        ButtonHandler::check();
+        PatternManager::runPattern();
+    }
     Indicator::run();
 }
