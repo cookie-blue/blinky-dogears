@@ -300,7 +300,6 @@
             }
         }
 
-        let demoStep;
         async function runDemo() {
             while (true) {
                 let currentPatternData = [...patternData];
@@ -310,7 +309,7 @@
                     currentPatternData = [[Array(ledcount).fill(0), 1000, 0]];
                 }
                 for (const step of currentPatternData) {
-                    demoStep = await runDemoStep(step);
+                    const demoStep = await runDemoStep(step);
                 }
             }
         }
