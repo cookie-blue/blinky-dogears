@@ -82,6 +82,7 @@
 
         addEventListener("DOMContentLoaded", () => {
             loadLocalStorage();
+            setupDemo();
             runDemo();
 
             document.querySelector("#ledcolor").addEventListener("change", (event) => {
@@ -97,6 +98,8 @@
                     console.error(error);
                 }
             });
+
+            document.querySelector("#reset").addEventListener("click", resetPatternData);
 
             document.querySelector("#steps").addEventListener("change", () => {
                 loadFromForm();
@@ -123,6 +126,17 @@
                 setPatternData([]);
             })
         });
+
+        function resetPatternData() {
+            ledCount = 2;
+            setupDemo();
+
+            let step1 = emptyStep();
+            step1[0][0] = 255;
+            let step2 = emptyStep();
+            step2[0][1] = 255;
+            setPatternData([step1, step2]);
+        }
 
         function setPatternData(value) {
             patternData = value
@@ -172,7 +186,7 @@
             const result = loadDataFromLocalStorage("patternData") || [];
             if (typeof result !== "object" || typeof result[0] !== "object" || typeof result[0][0] !== "object") {
                 console.error("invalid format in local storage");
-                setPatternData([]);
+                resetPatternData();
             } else {
                 setPatternData(result);
             }
@@ -276,8 +290,6 @@
             if (patternData.length > 0 && patternData[0].length > 0) {
                 document.querySelector("#ledcount").value = parseInt(patternData[0][0].length);
             }
-
-            setupDemo();
         }
 
         function loadFromForm() {
@@ -402,9 +414,9 @@
     <label for="code">
         <h2>Code</h2>
     </label>
-    <textarea id="code" cols="50" rows="10" placeholder="{{{128, 0}, 300, 0}, {{0, 128}, 300, 0}}"></textarea>
+    <textarea id="code" cols="50" rows="10" placeholder="{{{255, 0}, 1000, 0}, {{0, 255}, 1000, 0}}"></textarea>
     <br>
-    <button id="load">Load</button> <span id="loadOK">OK</span>
+    <button id="load">Load</button><button id="reset">Reset</button> <span id="loadOK">OK</span>
 </body>
 
 </html>
