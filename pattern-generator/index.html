@@ -133,16 +133,19 @@
             if (typeof result !== "object" || typeof result[0] !== "object" || typeof result[0][0] !== "object") {
                 console.error("invalid format in local storage");
                 patternData = []
+            }else{
+                patternData = result;
             }
             document.querySelector("#ledcolor").value = loadDataFromLocalStorage("ledColor") || "#FFFF00";
-            loadFromCode();
+            generateForm();
+            generateCode();
         }
 
         function loadDataFromLocalStorage(key) {
             try {
-                const localStorage = window.localStorage.getItem(key);
-                if (localStorage) {
-                    return JSON.parse(window.localStorage.getItem("key"));
+                const localStorageData = window.localStorage.getItem(key);
+                if (localStorageData) {
+                    return JSON.parse(localStorageData);
                 }
             } catch (error) {
                 console.error(`could not load ${key} from localStorage`);
@@ -338,7 +341,7 @@
                         leds[index].style.backgroundColor = newColor;
                     });
                     resolve();
-                }, duration);
+                }, parseInt(step[1]));
             });
         }
     </script>
