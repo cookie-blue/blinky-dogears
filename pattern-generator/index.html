@@ -78,6 +78,7 @@
     </style>
     <script>
         let patternData = [];
+        let ledCount = 2;
 
         addEventListener("DOMContentLoaded", () => {
             loadLocalStorage();
@@ -98,47 +99,84 @@
             });
 
             document.querySelector("#steps").addEventListener("change", () => {
-                generateCode();
+                loadFromForm();
             });
 
             document.querySelector("#add").addEventListener("click", () => {
-                const ledcount = parseInt(document.querySelector("#ledcount").value);
-                patternData.push([
-                    Array(ledcount).fill(0),
-                    0,
-                    0
-                ]);
-                generateForm();
-                generateCode();
+                appendPatternStep();
             });
 
-            document.querySelector("#ledcount").addEventListener("change", (ev) => {
+            document.querySelector("#ledcount").addEventListener("change", (event) => {
                 setupDemo();
+                ledCount = event.target.value
                 const stepcount = document.querySelectorAll("#steps .step").length;
                 if (stepcount == 0) {
                     return;
                 }
                 const response = confirm("Warning! this will clear all existing steps.");
                 if (!response) {
-                    ev.target.value = document.querySelectorAll("#steps .leds:first-of-type input").length
+                    event.target.value = document.querySelectorAll("#steps .leds:first-of-type input").length
+                    ledCount = event.target.value;
                     return;
                 }
 
-                document.querySelector("#steps").innerHTML = "";
+                setPatternData([]);
             })
         });
+
+        function setPatternData(value) {
+            patternData = value
+            console.log(`updated pattern data: ${patternData}`);
+            checkPatternData();
+
+            generateFormFromPatternData();
+            generateCodeFromPatternData();
+            window.localStorage.setItem("patternData", JSON.stringify(patternData));
+
+        }
+
+        function appendPatternStep() {
+            patternData.push(emptyStep());
+            console.log(`updated pattern data: ${patternData}`);
+            checkPatternData();
+
+            generateFormFromPatternData();
+            generateCodeFromPatternData();
+            window.localStorage.setItem("patternData", JSON.stringify(patternData));
+
+        }
+
+        function removePatternStep(index) {
+            setPatternData(patternData.filter((item, i) => i != index));
+        }
+
+        function checkPatternData() {
+            const totalTime = patternData.reduce((previous, current) => previous + current[1], 0);
+            if (totalTime < 5) {
+                appendPatternStep();
+            }
+
+            patternData = patternData.map((step, index) => {
+                if (step.length == 0) {
+                    return emptyStep();
+                }
+                return step;
+            });
+        }
+
+        function emptyStep() {
+            return [Array(ledCount).fill(0), 1000, 0];
+        }
 
         function loadLocalStorage() {
             const result = loadDataFromLocalStorage("patternData") || [];
             if (typeof result !== "object" || typeof result[0] !== "object" || typeof result[0][0] !== "object") {
                 console.error("invalid format in local storage");
-                patternData = []
-            }else{
-                patternData = result;
+                setPatternData([]);
+            } else {
+                setPatternData(result);
             }
             document.querySelector("#ledcolor").value = loadDataFromLocalStorage("ledColor") || "#FFFF00";
-            generateForm();
-            generateCode();
         }
 
         function loadDataFromLocalStorage(key) {
@@ -161,12 +199,8 @@
         }
 
         function newStep(step, index) {
-            if (step.length == 0) {
-                return;
-            }
-            const ledcount = parseInt(patternData[0][0].length);
             const clone = document.querySelector("#stepTemplate").content.cloneNode(true);
-            for (let i = 0; i < ledcount; i++) {
+            for (let i = 0; i < ledCount; i++) {
                 const led = newLed(step, index, i);
                 clone.querySelector(".leds").append(led);
             }
@@ -184,9 +218,7 @@
             clone.querySelector(".stepnum").innerText = index + 1;
 
             clone.querySelector("button.delete").addEventListener("click", (event) => {
-                patternData = patternData.filter((item, i) => i != index);
-                generateForm();
-                generateCode();
+                removePatternStep(index);
             });
 
             document.querySelector("#steps").append(clone);
@@ -223,21 +255,18 @@
                 code = `[${code}]`;
             }
 
-            patternData = JSON.parse(code);
+            setPatternData(JSON.parse(code));
             patternData.forEach((step, index) => {
-                if (step.length == 0){
+                if (step.length == 0) {
                     return;
                 }
                 if (step[0].length != patternData[0][0].length) {
                     throw new Error(`Inconsistent LED count: ${ledcount} in step 1 vs. ${step[0].length} in step ${index + 1}`);
                 }
             });
-
-            generateForm();
-            generateCode();
         }
 
-        function generateForm() {
+        function generateFormFromPatternData() {
             document.querySelector("#steps").innerHTML = "";
 
             patternData.forEach((step, index) => {
@@ -251,8 +280,7 @@
             setupDemo();
         }
 
-        function generateCode() {
-            const ledcount = parseInt(document.querySelector("#ledcount").value);
+        function loadFromForm() {
             let result = [];
             document.querySelectorAll("#steps .step").forEach((element) => {
                 leds = generateLeds(element.querySelectorAll("input.step_led"));
@@ -261,11 +289,11 @@
                 const step = [leds, duration, fade];
                 result.push(step);
             });
-            patternData = result;
-            window.localStorage.setItem("patternData", JSON.stringify(patternData));
-            console.log(`updated pattern data: ${result}`);
+            setPatternData(result);
+        }
 
-            result = JSON.stringify(result);
+        function generateCodeFromPatternData() {
+            result = JSON.stringify(patternData);
             const cleanedData = result
                 // braces
                 .replaceAll('[', '{')
@@ -276,9 +304,9 @@
                 .replace(/^{/, '{\n  ')
                 .replace(/}$/, '\n}');
 
-            if (result !== "[]"){
+            if (result !== "[]") {
                 document.querySelector("#code").value = `const Step patterns[][MAX_PATTERN_LENGTH] = ${cleanedData};`;
-            }else{
+            } else {
                 document.querySelector("#code").value = "";
             }
         }
@@ -295,7 +323,6 @@
         function setupDemo() {
             document.querySelector("#demo").innerHTML = "";
 
-            const ledcount = parseInt(document.querySelector("#ledcount").value);
             for (let i = 0; i < ledcount; i++) {
                 const led = document.querySelector("#demoLedTemplate").content.cloneNode(true);
                 led.querySelector(".demoLed").id = `demo_led_${i}`
@@ -306,11 +333,6 @@
         async function runDemo() {
             while (true) {
                 let currentPatternData = [...patternData];
-                if (currentPatternData.length == 0) {
-                    const ledcount = parseInt(document.querySelector("#ledcount").value);
-                    // fake pattern step so the loop isn't free wheeling
-                    currentPatternData = [[Array(ledcount).fill(0), 1000, 0]];
-                }
                 for (const step of currentPatternData) {
                     const demoStep = await runDemoStep(step);
                 }
@@ -320,7 +342,7 @@
         function runDemoStep(step) {
             return new Promise((resolve) => {
                 setTimeout(() => {
-                    if (step.length == 0){
+                    if (step.length == 0) {
                         return;
                     }
                     const ledColor = document.querySelector("#ledcolor").value;
