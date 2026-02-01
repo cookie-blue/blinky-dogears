@@ -261,7 +261,7 @@
                     return;
                 }
                 if (step[0].length != patternData[0][0].length) {
-                    throw new Error(`Inconsistent LED count: ${ledcount} in step 1 vs. ${step[0].length} in step ${index + 1}`);
+                    throw new Error(`Inconsistent LED count: ${ledCount} in step 1 vs. ${step[0].length} in step ${index + 1}`);
                 }
             });
         }
@@ -323,7 +323,7 @@
         function setupDemo() {
             document.querySelector("#demo").innerHTML = "";
 
-            for (let i = 0; i < ledcount; i++) {
+            for (let i = 0; i < ledCount; i++) {
                 const led = document.querySelector("#demoLedTemplate").content.cloneNode(true);
                 led.querySelector(".demoLed").id = `demo_led_${i}`
                 document.querySelector("#demo").append(led);
@@ -334,6 +334,7 @@
             while (true) {
                 let currentPatternData = [...patternData];
                 for (const step of currentPatternData) {
+                    console.log(step);
                     const demoStep = await runDemoStep(step);
                 }
             }
