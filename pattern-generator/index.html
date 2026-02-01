@@ -336,7 +336,6 @@
                             leds[index].style.transition = `none`;
                         }
                         const newColor = `${ledColor}${value.toString(16).padStart(2, "0")}`;
-                        console.log(newColor);
                         leds[index].style.backgroundColor = newColor;
                     });
                     resolve();
