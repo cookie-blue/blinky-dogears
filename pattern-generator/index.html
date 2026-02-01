@@ -350,24 +350,24 @@
 
         function runDemoStep(step) {
             return new Promise((resolve) => {
+                const ledColor = document.querySelector("#ledcolor").value;
+                const isFade = Boolean(step[2]);
+                const duration = parseInt(step[1]);
+                const leds = step[0];
+                leds.forEach((value, index) => {
+                    const leds = document.querySelectorAll("#demo .demoLed");
+                    if (leds.length < index + 1) {
+                        return;
+                    }
+                    if (isFade) {
+                        leds[index].style.transition = `background-color ${duration}ms`;
+                    } else {
+                        leds[index].style.transition = `none`;
+                    }
+                    const newColor = `${ledColor}${value.toString(16).padStart(2, "0")}`;
+                    leds[index].style.backgroundColor = newColor;
+                });
                 setTimeout(() => {
-                    const ledColor = document.querySelector("#ledcolor").value;
-                    const isFade = Boolean(step[2]);
-                    const duration = parseInt(step[1]);
-                    const leds = step[0];
-                    leds.forEach((value, index) => {
-                        const leds = document.querySelectorAll("#demo .demoLed");
-                        if (leds.length < index + 1) {
-                            return;
-                        }
-                        if (isFade) {
-                            leds[index].style.transition = `background-color ${duration}ms`;
-                        } else {
-                            leds[index].style.transition = `none`;
-                        }
-                        const newColor = `${ledColor}${value.toString(16).padStart(2, "0")}`;
-                        leds[index].style.backgroundColor = newColor;
-                    });
                     resolve();
                 }, parseInt(step[1]));
             });
