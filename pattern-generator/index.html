@@ -324,7 +324,8 @@
                     const ledColor = document.querySelector("#ledcolor").value;
                     const isFade = Boolean(step[2]);
                     const duration = parseInt(step[1]);
-                    step[0].forEach((value, index) => {
+                    const leds = step[0];
+                    leds.forEach((value, index) => {
                         const leds = document.querySelectorAll("#demo .demoLed");
                         if (leds.length < index + 1) {
                             return;
@@ -339,7 +340,7 @@
                         leds[index].style.backgroundColor = newColor;
                     });
                     resolve();
-                }, step[1]);
+                }, duration);
             });
         }
     </script>
