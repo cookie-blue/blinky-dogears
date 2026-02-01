@@ -53,8 +53,27 @@
             font-size: 1rem;
         }
 
-        #demo .demoLed {
+        #steps .step::before {
             display: inline-block;
+            width: 0.5rem;
+            font-size: 1rem;
+            content: " ";
+        }
+
+        #steps .step.active::before {
+            content: "›";
+        }
+
+        #demo {
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        #demo .demoLed {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-variant-numeric: tabular-nums;
             width: 5rem;
             height: 5rem;
             border-radius: 50%;
@@ -333,8 +352,10 @@
             document.querySelector("#demo").innerHTML = "";
 
             for (let i = 0; i < ledCount; i++) {
-                const led = document.querySelector("#demoLedTemplate").content.cloneNode(true);
-                led.querySelector(".demoLed").id = `demo_led_${i}`
+                const ledTemplate = document.querySelector("#demoLedTemplate").content.cloneNode(true);
+                const led = ledTemplate.querySelector(".demoLed");
+                led.id = `demo_led_${i}`;
+                led.innerText = `LED ${i + 1}`;
                 document.querySelector("#demo").append(led);
             }
         }
@@ -342,10 +363,22 @@
         async function runDemo() {
             while (true) {
                 let currentPatternData = [...patternData];
-                for (const step of currentPatternData) {
+                for (const index in currentPatternData) {
+                    const step = currentPatternData[index];
+                    highlightCurrentStep(index);
                     const demoStep = await runDemoStep(step);
                 }
             }
+        }
+
+        function highlightCurrentStep(currentIndex) {
+            document.querySelectorAll("#steps .step").forEach((element, key) => {
+                if (key == currentIndex) {
+                    element.classList.add("active");
+                } else {
+                    element.classList.remove("active");
+                }
+            });
         }
 
         function runDemoStep(step) {
