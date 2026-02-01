@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+    <title>Pattern Generator</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        :root,
+        :host {
+            --font-family-emoji: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        }
+
+        body {
+            font-family: system-ui, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, Helvetica, Arial, "Helvetica Neue", sans-serif, var(--font-family-emoji);
+            line-height: 1.5;
+            font-size: 100%;
+        }
+
+        h1,
+        h2 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+
+        textarea {
+            font-family: "Monoflow", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace, var(--font-family-emoji);
+        }
+
+        input[type=number] {
+            width: 4rem;
+        }
+
+        button {
+            padding: 0.25rem 0.5rem;
+        }
+
+        .leds {
+            display: inline;
+        }
+
+        .lednum,
+        .stepnum {
+            font-variant-numeric: tabular-nums;
+        }
+
+        #steps {
+            font-size: 0.9rem;
+        }
+
+        #steps .stepnum,
+        #steps input {
+            font-size: 1rem;
+        }
+
+        #demo .demoLed {
+            display: inline-block;
+            width: 5rem;
+            height: 5rem;
+            border-radius: 50%;
+            border: 1px solid black;
+        }
+
+        #loadOK {
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+
+            border: 1px solid darkgreen;
+            background-color: lightgreen;
+            color: green;
+            padding: 0.25rem 0.5rem;
+        }
+
+        #loadOK.show {
+            opacity: 1;
+            transition: none;
+        }
+    </style>
+    <script>
+        let patternData = [];
+
+        addEventListener("DOMContentLoaded", () => {
+            loadLocalStorage();
+            runDemo();
+
+            document.querySelector("#ledcolor").addEventListener("change", (event) => {
+                window.localStorage.setItem("ledColor", event.target.value);
+            });
+
+            document.querySelector("#load").addEventListener("click", () => {
+                try {
+                    loadFromCode();
+                    showOK(document.querySelector("#loadOK"));
+                } catch (error) {
+                    alert(`Could not load pattern: ${error}`);
+                    console.error(error);
+                }
+            });
+
+            document.querySelector("#steps").addEventListener("change", () => {
+                generateCode();
+            });
+
+            document.querySelector("#add").addEventListener("click", () => {
+                const ledcount = parseInt(document.querySelector("#ledcount").value);
+                patternData.push([
+                    Array(ledcount).fill(0),
+                    0,
+                    0
+                ]);
+                generateForm();
+                generateCode();
+            });
+
+            document.querySelector("#ledcount").addEventListener("change", (ev) => {
+                const stepcount = document.querySelectorAll("#steps .step").length;
+                if (stepcount == 0) {
+                    return;
+                }
+                const response = confirm("Warning! this will clear all existing steps.");
+                if (!response) {
+                    ev.target.value = document.querySelectorAll("#steps .leds:first-of-type input").length
+                    return;
+                }
+
+                document.querySelector("#steps").innerHTML = "";
+            })
+        });
+
+        function loadLocalStorage() {
+            const result = loadDataFromLocalStorage("patternData") || [];
+            if (typeof result !== "object" || typeof result[0] !== "object" || typeof result[0][0] !== "object") {
+                console.error("invalid format in local storage");
+                patternData = []
+            }
+            document.querySelector("#ledcolor").value = loadDataFromLocalStorage("ledColor") || "#FFFF00";
+            loadFromCode();
+        }
+
+        function loadDataFromLocalStorage(key) {
+            try {
+                const localStorage = window.localStorage.getItem(key);
+                if (localStorage) {
+                    return JSON.parse(window.localStorage.getItem("key"));
+                }
+            } catch (error) {
+                console.error(`could not load ${key} from localStorage`);
+                window.localStorage.removeItem(key);
+            }
+        }
+
+        function showOK(element) {
+            element.classList.add("show");
+            window.setTimeout(() => {
+                element.classList.remove("show");
+            }, 1000)
+        }
+
+        function newStep(step, index) {
+            if (step.length == 0) {
+                return;
+            }
+            const ledcount = parseInt(patternData[0][0].length);
+            const clone = document.querySelector("#stepTemplate").content.cloneNode(true);
+            for (let i = 0; i < ledcount; i++) {
+                const led = newLed(step, index, i);
+                clone.querySelector(".leds").append(led);
+            }
+
+            const durationInput = clone.querySelector("input#step_duration")
+            durationInput.value = step[1] || "";
+            durationInput.id = `step_duration_${index}`;
+            clone.querySelector("label[for=\"step_duration\"]").setAttribute("for", `step_duration_${index}`);
+
+            const fadeInput = clone.querySelector("input#step_fade");
+            fadeInput.checked = step[2] || false;
+            fadeInput.id = `step_fade_${index}`;
+            clone.querySelector("label[for=\"step_fade\"]").setAttribute("for", `step_fade_${index}`);
+
+            clone.querySelector(".stepnum").innerText = index + 1;
+
+            clone.querySelector("button.delete").addEventListener("click", (event) => {
+                patternData = patternData.filter((item, i) => i != index);
+                generateForm();
+                generateCode();
+            });
+
+            document.querySelector("#steps").append(clone);
+        }
+
+        function newLed(step, index, lednum) {
+            const led = document.querySelector("#stepLedTemplate").content.cloneNode(true);
+            const ledInput = led.querySelector("input");
+            ledInput.id = `step_led_${index}_${lednum}`;
+            ledInput.value = (step[0] || [])[lednum] || 0;
+
+            led.querySelector("label").setAttribute("for", `step_led_${index}_${lednum}`);
+            led.querySelector("label span.lednum").innerText = lednum + 1;
+
+            return led;
+        }
+
+        function loadFromCode() {
+            let code = document.querySelector("#code").value
+                // variable declaration prefix
+                .replace(/^[^\{]+/, '')
+
+                // spaces
+                .replace(/\s*/g, '')
+
+                // trailing comma/semicolon
+                .replace(/[,;](\}|$)/g, '$1')
+
+                // braces
+                .replaceAll('{', '[')
+                .replaceAll('}', ']');
+
+            if (code.substr(0, 3) !== '[[[') {
+                code = `[${code}]`;
+            }
+
+            patternData = JSON.parse(code);
+            patternData.forEach((step, index) => {
+                if (step.length == 0){
+                    return;
+                }
+                if (step[0].length != patternData[0][0].length) {
+                    throw new Error(`Inconsistent LED count: ${ledcount} in step 1 vs. ${step[0].length} in step ${index + 1}`);
+                }
+            });
+
+            generateForm();
+            generateCode();
+        }
+
+        function generateForm() {
+            document.querySelector("#steps").innerHTML = "";
+
+            patternData.forEach((step, index) => {
+                newStep(step, index);
+            });
+
+            if (patternData.length > 0 && patternData[0].length > 0) {
+                document.querySelector("#ledcount").value = parseInt(patternData[0][0].length);
+            }
+
+            setupDemo();
+        }
+
+        function generateCode() {
+            const ledcount = parseInt(document.querySelector("#ledcount").value);
+            let result = [];
+            document.querySelectorAll("#steps .step").forEach((element) => {
+                leds = generateLeds(element.querySelectorAll("input.step_led"));
+                duration = parseInt(element.querySelector("input.step_duration").value) || 0;
+                fade = element.querySelector("input.step_fade").checked ? 1 : 0;
+                const step = [leds, duration, fade];
+                result.push(step);
+            });
+            patternData = result;
+            window.localStorage.setItem("patternData", JSON.stringify(patternData));
+            console.log(`updated pattern data: ${result}`);
+
+            result = JSON.stringify(result);
+            const cleanedData = result
+                // braces
+                .replaceAll('[', '{')
+                .replaceAll(']', '}')
+
+                // linebreaks + indentation
+                .replaceAll(',{{', ',\n  {{')
+                .replace(/^{/, '{\n  ')
+                .replace(/}$/, '\n}');
+
+            if (result !== "[]"){
+                document.querySelector("#code").value = `const Step patterns[][MAX_PATTERN_LENGTH] = ${cleanedData};`;
+            }else{
+                document.querySelector("#code").value = "";
+            }
+        }
+
+        function generateLeds(leds) {
+            let result = [];
+            leds.forEach((element) => {
+                const led = parseInt(element.value);
+                result.push(led);
+            });
+            return result;
+        }
+
+        function setupDemo() {
+            document.querySelector("#demo").innerHTML = "";
+
+            const ledcount = parseInt(document.querySelector("#ledcount").value);
+            for (let i = 0; i < ledcount; i++) {
+                const led = document.querySelector("#demoLedTemplate").content.cloneNode(true);
+                led.querySelector(".demoLed").id = `demo_led_${i}`
+                document.querySelector("#demo").append(led);
+            }
+        }
+
+        let demoStep;
+        async function runDemo() {
+            while (true) {
+                let currentPatternData = [...patternData];
+                if (currentPatternData.length == 0) {
+                    const ledcount = parseInt(document.querySelector("#ledcount").value);
+                    // fake pattern step so the loop isn't free wheeling
+                    currentPatternData = [[Array(ledcount).fill(0), 1000, 0]];
+                }
+                for (const step of currentPatternData) {
+                    demoStep = await runDemoStep(step);
+                }
+            }
+        }
+
+        function runDemoStep(step) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    if (step.length == 0){
+                        return;
+                    }
+                    const ledColor = document.querySelector("#ledcolor").value;
+                    const isFade = Boolean(step[2]);
+                    const duration = parseInt(step[1]);
+                    step[0].forEach((value, index) => {
+                        const leds = document.querySelectorAll("#demo .demoLed");
+                        if (leds.length < index + 1) {
+                            return;
+                        }
+                        if (isFade) {
+                            leds[index].style.transition = `background-color ${duration}ms`;
+                        } else {
+                            leds[index].style.transition = `none`;
+                        }
+                        const newColor = `${ledColor}${value.toString(16).padStart(2, "0")}`;
+                        console.log(newColor);
+                        leds[index].style.backgroundColor = newColor;
+                    });
+                    resolve();
+                }, step[1]);
+            });
+        }
+    </script>
+</head>
+
+<body>
+    <h1>Pattern Generator</h1>
+    <label for="ledcolor">LED Color:</label><br>
+    <input type="color" id="ledcolor" value="#FFFF00"><br>
+    <label for="ledcount">LED Count:</label><br>
+    <input id="ledcount" type="number" value="2" min="1"><br>
+    <h2>Animation Steps:</h2>
+    <template id="stepLedTemplate">
+        <label for="step_led">LED <span class="lednum">?</span>:</label> <input type="number" id="step_led"
+            class="step_led" min="0" max="255">
+    </template>
+    <template id="stepTemplate">
+        <div class="step">
+            #<span class="stepnum">?</span>&nbsp;
+            <div class="leds"></div>
+            <label for="step_duration">duration:</label> <input type="number" id="step_duration" class="step_duration"
+                min="0" max="60000"> ms
+            <input type="checkbox" id="step_fade" class="step_fade" value="1"><label for="step_fade">fade</label>
+            <button class="delete">&times;</button>
+        </div>
+    </template>
+    <form id="steps"></form>
+    <button id="add">+</button><br>
+    <h2>Demo</h2>
+    <template id="demoLedTemplate">
+        <div class="demoLed"></div>
+    </template>
+    <div id="demo"></div>
+    <hr>
+    <label for="code">
+        <h2>Code</h2>
+    </label>
+    <textarea id="code" cols="50" rows="10" placeholder="{{{128, 0}, 300, 0}, {{0, 128}, 300, 0}}"></textarea>
+    <br>
+    <button id="load">Load</button> <span id="loadOK">OK</span>
+</body>
+
+</html>
