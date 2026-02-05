@@ -5,38 +5,11 @@
     <title>Pattern Generator</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.blue.min.css">
     <style>
-        :root,
-        :host {
-            --font-family-emoji: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-        }
-
-        body {
-            font-family: system-ui, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, Helvetica, Arial, "Helvetica Neue", sans-serif, var(--font-family-emoji);
-            line-height: 1.5;
-            font-size: 100%;
-        }
-
-        h1,
-        h2 {
-            margin-top: 0;
-            margin-bottom: 1rem;
-        }
-
-        textarea {
-            font-family: "Monoflow", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace, var(--font-family-emoji);
-        }
-
-        input[type=number] {
-            width: 4rem;
-        }
-
-        button {
-            padding: 0.25rem 0.5rem;
-        }
-
-        .leds {
-            display: inline;
+        textarea#code {
+            font-family: var(--pico-font-family-monospace);
         }
 
         .lednum,
@@ -44,24 +17,42 @@
             font-variant-numeric: tabular-nums;
         }
 
-        #steps {
-            font-size: 0.9rem;
+        #ledconfig {
+            display: flex;
         }
 
-        #steps .stepnum,
-        #steps input {
-            font-size: 1rem;
+        #ledconfig > div {
+            width: 8rem;
         }
 
-        #steps .step::before {
+        #ledconfig input {
+            width: 5rem;
+        }
+
+        #steps table {
+            width: auto;
+        }
+
+        #steps input[type=number] {
+            width: auto;
+        }
+
+        #steps .leds>div {
             display: inline-block;
-            width: 0.5rem;
-            font-size: 1rem;
-            content: " ";
+            margin: 0 1rem 0 0;
         }
 
-        #steps .step.active::before {
-            content: "›";
+        #steps .step .indicator {
+            visibility: hidden;
+        }
+
+        #steps .step.active .indicator {
+            visibility: visible;
+        }
+
+        #steps button.delete {
+            background-color: #D93526;
+            border-color: #D93526;
         }
 
         #demo {
@@ -84,10 +75,16 @@
             opacity: 0;
             transition: opacity 1s ease-in-out;
 
-            border: 1px solid darkgreen;
-            background-color: lightgreen;
-            color: green;
-            padding: 0.25rem 0.5rem;
+            font-weight: var(--pico-font-weight);
+            font-size: 1rem;
+            line-height: var(--pico-line-height);
+            text-align: center;
+            border: var(--pico-border-width) solid #173806;
+            background-color: #398712;
+            color: #D7FBC1;
+            display: inline-block;
+            padding: var(--pico-form-element-spacing-vertical) var(--pico-form-element-spacing-horizontal);
+            border-radius: var(--pico-border-radius);
         }
 
         #loadOK.show {
@@ -130,16 +127,17 @@
 
             document.querySelector("#ledcount").addEventListener("change", (event) => {
                 setupDemo();
-                ledCount = event.target.value
-                const stepcount = document.querySelectorAll("#steps .step").length;
-                if (stepcount == 0) {
-                    return;
-                }
-                const response = confirm("Warning! this will clear all existing steps.");
-                if (!response) {
-                    event.target.value = document.querySelectorAll("#steps .leds:first-of-type input").length
-                    ledCount = event.target.value;
-                    return;
+                ledCount = parseInt(event.target.value);
+                const stepcount = patternData.length;
+                const totalBrightness = patternData.reduce((previous, current) => previous + current[0].reduce((a, b) => a + b), 0);
+
+                if (stepcount > 0 && totalBrightness > 0) {
+                    const response = confirm("Warning! this will clear all existing steps.");
+                    if (!response) {
+                        event.target.value = stepcount;
+                        ledCount = stepcount;
+                        return;
+                    }
                 }
 
                 setPatternData([]);
@@ -159,9 +157,10 @@
 
         function setPatternData(value) {
             patternData = value
-            console.log(`updated pattern data: ${patternData}`);
+            console.log(`updated pattern data: ${JSON.stringify(patternData)}`);
             checkPatternData();
 
+            ledCount = patternData[0][0].length;
             generateFormFromPatternData();
             generateCodeFromPatternData();
             window.localStorage.setItem("patternData", JSON.stringify(patternData));
@@ -170,7 +169,7 @@
 
         function appendPatternStep() {
             patternData.push(emptyStep());
-            console.log(`updated pattern data: ${patternData}`);
+            console.log(`updated pattern data: ${JSON.stringify(patternData)}`);
             checkPatternData();
 
             generateFormFromPatternData();
@@ -209,7 +208,7 @@
             } else {
                 setPatternData(result);
             }
-            document.querySelector("#ledcolor").value = loadDataFromLocalStorage("ledColor") || "#FFFF00";
+            document.querySelector("#ledcolor").value = loadDataFromLocalStorage("ledColor") || "#F2DF0D";
         }
 
         function loadDataFromLocalStorage(key) {
@@ -254,7 +253,7 @@
                 removePatternStep(index);
             });
 
-            document.querySelector("#steps").append(clone);
+            document.querySelector("#steps tbody").append(clone);
         }
 
         function newLed(step, index, lednum) {
@@ -297,7 +296,7 @@
         }
 
         function generateFormFromPatternData() {
-            document.querySelector("#steps").innerHTML = "";
+            document.querySelector("#steps tbody").innerHTML = "";
 
             patternData.forEach((step, index) => {
                 newStep(step, index);
@@ -409,40 +408,76 @@
 </head>
 
 <body>
-    <h1>Pattern Generator</h1>
-    <label for="ledcolor">LED Color:</label><br>
-    <input type="color" id="ledcolor" value="#FFFF00"><br>
-    <label for="ledcount">LED Count:</label><br>
-    <input id="ledcount" type="number" value="2" min="1"><br>
-    <h2>Animation Steps:</h2>
-    <template id="stepLedTemplate">
-        <label for="step_led">LED <span class="lednum">?</span>:</label> <input type="number" id="step_led"
-            class="step_led" min="0" max="255">
-    </template>
-    <template id="stepTemplate">
-        <div class="step">
-            #<span class="stepnum">?</span>&nbsp;
-            <div class="leds"></div>
-            <label for="step_duration">duration:</label> <input type="number" id="step_duration" class="step_duration"
-                min="0" max="60000"> ms
-            <input type="checkbox" id="step_fade" class="step_fade" value="1"><label for="step_fade">fade</label>
-            <button class="delete">&times;</button>
-        </div>
-    </template>
-    <form id="steps"></form>
-    <button id="add">+</button><br>
-    <h2>Demo</h2>
-    <template id="demoLedTemplate">
-        <div class="demoLed"></div>
-    </template>
-    <div id="demo"></div>
-    <hr>
-    <label for="code">
-        <h2>Code</h2>
-    </label>
-    <textarea id="code" cols="50" rows="10" placeholder="{{{255, 0}, 1000, 0}, {{0, 255}, 1000, 0}}"></textarea>
-    <br>
-    <button id="load">Load</button><button id="reset">Reset</button> <span id="loadOK">OK</span>
+    <header class="container">
+        <hgroup>
+            <h1>Pattern Generator</h1>
+        </hgroup>
+    </header>
+    <main class="container">
+        <section id="ledconfig">
+            <div>
+                <label for="ledcolor">LED Color:</label>
+                <input type="color" id="ledcolor" value="#FFFF00">
+            </div>
+            <div>
+                <label for="ledcount">LED Count:</label>
+                <input id="ledcount" type="number" value="2" min="1">
+            </div>
+        </section>
+        <section>
+            <h2>Animation Steps:</h2>
+            <template id="stepLedTemplate">
+                <div>
+                    <label for="step_led">LED <span class="lednum">?</span>:</label> <input type="number" id="step_led"
+                        class="step_led" min="0" max="255">
+                </div>
+            </template>
+            <template id="stepTemplate">
+                <tr class="step">
+                    <td><span class="indicator">&rsaquo;</span></td>
+                    <td>
+                        #<span class="stepnum">?</span>
+                    </td>
+                    <td class="leds">
+                    </td>
+                    <td>
+                        <label for="step_duration">duration:</label> <input type="number" id="step_duration"
+                            class="step_duration" min="0" max="60000"> ms
+                    </td>
+                    <td>
+                        <input type="checkbox" role="switch" id="step_fade" class="step_fade" value="1"><label
+                            for="step_fade">fade</label>
+                    </td>
+                    <td>
+                        <button class="delete">&times;</button>
+                    </td>
+                </tr>
+            </template>
+            <form id="steps">
+                <table class="striped">
+                    <tbody>
+                    </tbody>
+                </table>
+            </form>
+            <button id="add">+</button><br>
+        </section>
+        <section>
+            <h2>Demo</h2>
+            <template id="demoLedTemplate">
+                <div class="demoLed"></div>
+            </template>
+            <div id="demo"></div>
+        </section>
+        <section id="code">
+            <label for="code">
+                <h2>Code</h2>
+            </label>
+            <textarea id="code" cols="50" rows="10" placeholder="{{{255, 0}, 1000, 0}, {{0, 255}, 1000, 0}}"></textarea>
+            <br>
+            <button id="load">Load</button> <button id="reset" class="secondary">Reset</button>
+            <div id="loadOK">OK</div>
+        </section>
+    </main>
 </body>
 
 </html>
