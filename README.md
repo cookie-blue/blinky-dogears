@@ -7,7 +7,7 @@
 * 5V COB LED Strip 3mm ([AliExpress](https://aliexpress.com/item/1005006461651051.html))
 * ESP32-C3 ([Amazon](https://www.amazon.com/dp/B0DD3ZB5XV))
 * 36AWG (0.0127 mm²) Wire ([AliExpress](https://aliexpress.com/item/4001028437947.html))
-* 2N2222 Transistor ([AliExpress](https://aliexpress.com/item/1005002840840376.html))
+* 2N2222 Transistor ([AliExpress](https://aliexpress.com/item/1005002840840376.html)) or Mosfet (e.g. IRF540N) for longer LED strips ([AliExpress](https://aliexpress.com/item/1005002958220557.html))
 * Elastic Band ([Amazon](https://www.amazon.com/dp/B0F59RBNKZ))
 
 ## Bluetooth
