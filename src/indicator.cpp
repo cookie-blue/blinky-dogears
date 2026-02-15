@@ -48,9 +48,11 @@ void Indicator::off()
 
 void Indicator::set(uint8_t state)
 {
+#ifdef STATUS_LED_PIN
     Indicator::_isOn = state;
     state = (STATUS_LED_INVERTED ? !state : state);
     digitalWrite(STATUS_LED_PIN, state);
+#endif
 }
 
 void Indicator::run()
