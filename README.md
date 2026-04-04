@@ -19,14 +19,15 @@ The following Commands are Supported:
 * `+` Next Pattern (same as the physical button)
 * `-` Previous Pattern
 * `PX` Pattern X (`P1`, `P2`, `P3` etc.)
-* `BX` Constant brightness X% (gamma corrected) (`B10` = 10%, `B69` = 69% etc.) 
+* `BX` Constant brightness X% (gamma corrected) (`B10` = 10%, `B69` = 69% etc.)
+* `DX` Override pattern brightness to X% (gamma corrected) (`D10` = 10%, `D69` = 69% etc.)
 * `OFF` Turn LEDs off
 * `ON` Turn LEDs on and resume Pattern
 
 ## PCB
 
 > [!WARNING]
-> TODO: this is still the old PCB.
+> TODO: this is still the old PCB. (But should be very similar for the ESP32)
 
 ![](pcb/pcb_schem.jpg)
 

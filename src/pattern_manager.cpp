@@ -7,6 +7,7 @@ uint8_t PatternManager::_currentPattern = 0;
 uint8_t PatternManager::_currentStep = 0;
 uint8_t PatternManager::_numPatterns = NUM_PATTERNS;
 uint8_t PatternManager::_patternLengths[NUM_PATTERNS];
+uint8_t PatternManager::brightnessOverride = 0;
 
 void PatternManager::init()
 {
@@ -58,6 +59,11 @@ void PatternManager::override(uint8_t brightness)
         LED::write(ledPins[i], brightness);
 }
 
+void PatternManager::overrideBrightness(uint8_t brightness)
+{
+    PatternManager::brightnessOverride = brightness;
+}
+
 void PatternManager::prevPattern()
 {
     PatternManager::_currentPattern = (PatternManager::_currentPattern - 1 + PatternManager::_numPatterns) % PatternManager::_numPatterns;
@@ -101,6 +107,7 @@ void PatternManager::_switchPattern()
     Log::log("switching to pattern %d", PatternManager::_currentPattern);
     PatternManager::_poweredOn = true;
     PatternManager::_currentStep = 0;
+    PatternManager::brightnessOverride = 0;
     InstantPattern::reset();
     FadePattern::reset();
     for (uint8_t i = 0; i < LED_COUNT; i++)

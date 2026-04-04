@@ -54,6 +54,11 @@ class CommandCallbacks : public NimBLECharacteristicCallbacks
             int brightness = std::stoi(rx.substr(1));
             PatternManager::override(255 * brightness / 100);
         }
+        else if (rx.length() > 1 && rx[0] == 'D')
+        {
+            int brightness = std::stoi(rx.substr(1));
+            PatternManager::overrideBrightness(255 * brightness / 100);
+        }
         else if (rx.length() > 1 && rx[0] == 'P')
         {
             int pattern = std::stoi(rx.substr(1));

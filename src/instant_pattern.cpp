@@ -7,8 +7,6 @@ void InstantPattern::run()
     uint8_t pattern = PatternManager::getCurrentPattern();
     uint8_t step = PatternManager::getCurrentStep();
     const Step currentPatternStep = patterns[pattern].steps[step];
-    const float patternBrightness = (patterns[pattern].brightness / 255);
-
 
     if (millis() - InstantPattern::_previousMillis < currentPatternStep.duration)
         return;
@@ -20,7 +18,7 @@ void InstantPattern::run()
 
     for (uint8_t i = 0; i < LED_COUNT; i++)
     {
-        uint8_t brightness = currentPatternStep.leds[i] * patternBrightness;
+        uint8_t brightness = currentPatternStep.leds[i];
         LED::write(ledPins[i], brightness);
     }
 

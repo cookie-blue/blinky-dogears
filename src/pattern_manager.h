@@ -18,6 +18,7 @@ private:
     static void _calculatePatternLengths();
 
 public:
+    static uint8_t brightnessOverride;
     static void init();
     static void runPattern();
     static void prevPattern();
@@ -26,6 +27,7 @@ public:
     static void on();
     static void off();
     static void override(uint8_t brightness);
+    static void overrideBrightness(uint8_t brightness);
     static uint8_t getCurrentPattern();
     static uint8_t getCurrentStep();
     static void nextStep();

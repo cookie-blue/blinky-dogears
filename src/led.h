@@ -1,6 +1,7 @@
 #pragma once
 
 #include "config.h"
+#include "pattern_manager.h"
 
 class LED
 {
