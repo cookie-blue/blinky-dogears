@@ -23,16 +23,21 @@ void FadePattern::run()
 {
     uint8_t pattern = PatternManager::getCurrentPattern();
     uint8_t step = PatternManager::getCurrentStep();
-    const Step currentPatternStep = patterns[pattern][step];
+    const Step currentPatternStep = patterns[pattern].steps[step];
+    const float patternBrightness = (patterns[pattern].brightness / 255);
 
     if (!FadePattern::_fading)
         FadePattern::_start(currentPatternStep);
 
-    float progress = float(millis() - FadePattern::_fadeStartMillis) / currentPatternStep.duration;
+    float progress = min(float(millis() - FadePattern::_fadeStartMillis) / currentPatternStep.duration, 1.0f);
 
     for (uint8_t i = 0; i < LED_COUNT; i++)
     {
-        uint8_t brightness = FadePattern::_startBrightness[i] + (FadePattern::_targetBrightness[i] - FadePattern::_startBrightness[i]) * min(progress, 1.0f);
+        uint8_t startBrightness = FadePattern::_startBrightness[i];
+        int8_t stepBrightnessDiff = FadePattern::_targetBrightness[i] - startBrightness;
+        int8_t brightnessIncrease = stepBrightnessDiff * progress;
+
+        uint8_t brightness = (startBrightness + brightnessIncrease) * patternBrightness;
         LED::write(ledPins[i], brightness);
     }
 

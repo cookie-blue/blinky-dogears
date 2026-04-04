@@ -22,8 +22,11 @@ void setup()
     delay(1000);
 
     Log::log("setting up pins...");
-    for (uint8_t i = 0; i < LED_COUNT; i++)
+    for (uint8_t i = 0; i < LED_COUNT; i++) {
+        Log::log("LED pin %d: %d...", i, ledPins[i]);
         ledcAttach(ledPins[i], PWM_FREQUENCY, PWM_RESOLUTION);
+    }
+    Log::log("Button pin %d", BUTTON_PIN);
     pinMode(BUTTON_PIN, INPUT_PULLUP);
 
     Indicator::init();

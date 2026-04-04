@@ -32,21 +32,44 @@ const uint8_t ledPins[LED_COUNT] = {0, 1};
 #define MDNS_NAME "blinky"
 
 // --- Patterns ---
+#define MAX_PATTERN_LENGTH 12
+
 #include "step.h"  // dont' worry about it. just leave it here.
 
-#define MAX_PATTERN_LENGTH 12
-const Step patterns[][MAX_PATTERN_LENGTH] = {
+const Pattern patterns[] = {
     // Pattern 1: Alternate blink 50%
-    {{{128, 0}, 300, 0}, {{0, 128}, 300, 0}},
+    { .brightness = 128, .steps = {
+        {.leds = {255, 0}, .duration = 300, .fade = false},
+        {.leds = {0, 255}, .duration = 300, .fade = false},
+    }},
+
     // Pattern 2: Both fade
-    {{{0, 0}, 800, 1}, {{128, 128}, 800, 1}},
+    { .brightness = 128, .steps = {
+        {.leds = {0, 0}, .duration = 800, .fade = true},
+        {.leds = {255, 255}, .duration = 800, .fade = true},
+    }},
+
     // Pattern 3: alternate fade 0-50%
-    {{{128, 0}, 800, 1}, {{0, 128}, 800, 1}},
+    { .brightness = 128, .steps = {
+        {.leds = {255, 0}, .duration = 800, .fade = true},
+        {.leds = {0, 255}, .duration = 800, .fade = true},
+    }},
+
     // Patern 4: RTW
-    {
-        {{255, 0}, 160, 0}, {{0, 0}, 60, 0}, {{255, 0}, 25, 0}, {{0, 0}, 10, 0}, {{255, 0}, 25, 0}, {{0, 0}, 160, 0},
-        {{0, 255}, 160, 0}, {{0, 0}, 60, 0}, {{0, 255}, 25, 0}, {{0, 0}, 10, 0}, {{0, 255}, 25, 0}, {{0, 0}, 160, 0}
-    }
+    { .brightness = 255, .steps = {
+        {.leds = {255, 0}, .duration = 160, .fade = false},
+        {.leds = {0, 0}, .duration = 60, .fade = false},
+        {.leds = {255, 0}, .duration = 25, .fade = false},
+        {.leds = {0, 0}, .duration = 10, .fade = false},
+        {.leds = {255, 0}, .duration = 25, .fade = false},
+        {.leds = {0, 0}, .duration = 160, .fade = false},
+        {.leds = {0, 255}, .duration = 160, .fade = false},
+        {.leds = {0, 0}, .duration = 60, .fade = false},
+        {.leds = {0, 255}, .duration = 25, .fade = false},
+        {.leds = {0, 0}, .duration = 10, .fade = false},
+        {.leds = {0, 255}, .duration = 25, .fade = false},
+        {.leds = {0, 0}, .duration = 160, .fade = false}
+    }},
 };
 
 // --- PWM Configuration ---

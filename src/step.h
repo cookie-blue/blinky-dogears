@@ -8,3 +8,8 @@ struct Step
     unsigned int duration;   // milliseconds
     bool fade;               // true = fade, false = instant
 };
+
+struct Pattern {
+    uint8_t brightness;  // overall brightness modifier for each pattern
+    Step steps[MAX_PATTERN_LENGTH];
+};

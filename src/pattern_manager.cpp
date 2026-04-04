@@ -18,7 +18,7 @@ void PatternManager::runPattern()
     if (!PatternManager::_poweredOn)
         return;
 
-    if (patterns[PatternManager::_currentPattern][PatternManager::_currentStep].fade)
+    if (patterns[PatternManager::_currentPattern].steps[PatternManager::_currentStep].fade)
         FadePattern::run();
     else
         InstantPattern::run();
@@ -114,7 +114,7 @@ void PatternManager::_calculatePatternLengths()
         uint8_t len = 0;
         for (uint8_t step = 0; step < MAX_PATTERN_LENGTH; step++)
         {
-            if (patterns[pattern][step].duration == 0)
+            if (patterns[pattern].steps[step].duration == 0)
                 break;
             len++;
         }
