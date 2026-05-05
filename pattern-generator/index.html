@@ -22,11 +22,16 @@
         }
 
         #ledconfig > div {
-            width: 8rem;
+            margin-right: 1rem;
+            width: auto;
         }
 
         #ledconfig input {
             width: 5rem;
+        }
+
+        #ledconfig input[type=range] {
+            width: 10rem;
         }
 
         #steps table {
@@ -37,9 +42,21 @@
             width: auto;
         }
 
+        #steps input[type=range] {
+            width: 8rem;
+            vertical-align: middle;
+        }
+
         #steps .leds>div {
             display: inline-block;
             margin: 0 1rem 0 0;
+        }
+
+        .sliderValue {
+            display: inline-block;
+            font-variant-numeric: tabular-nums;
+            min-width: 3ch;
+            text-align: right;
         }
 
         #steps .step .indicator {
@@ -117,8 +134,20 @@
 
             document.querySelector("#reset").addEventListener("click", resetPatternData);
 
+            document.querySelector("#steps").addEventListener("input", (event) => {
+                if (event.target.matches("input[type=range]")) {
+                    updateSliderValue(event.target);
+                    loadFromForm(false);
+                }
+            });
+
             document.querySelector("#steps").addEventListener("change", () => {
                 loadFromForm();
+            });
+
+            document.querySelector("#brightness").addEventListener("input", (event) => {
+                updateSliderValue(event.target);
+                loadFromForm(false);
             });
 
             document.querySelector("#brightness").addEventListener("change", () => {
@@ -329,6 +358,8 @@
 
             led.querySelector("label").setAttribute("for", `step_led_${index}_${lednum}`);
             led.querySelector("label span.lednum").innerText = lednum + 1;
+            led.querySelector("output").setAttribute("for", `step_led_${index}_${lednum}`);
+            led.querySelector("output").innerText = ledInput.value;
 
             return led;
         }
@@ -401,13 +432,14 @@
             });
 
             document.querySelector("#brightness").value = patternData["brightness"];
+            updateSliderValue(document.querySelector("#brightness"));
 
             if (patternData["steps"].length > 0 && patternData["steps"][0]["leds"].length > 0) {
                 document.querySelector("#ledcount").value = parseInt(patternData["steps"][0]["leds"].length);
             }
         }
 
-        function loadFromForm() {
+        function loadFromForm(renderForm = true) {
             let steps = [];
             document.querySelectorAll("#steps .step").forEach((element) => {
                 const leds = generateLeds(element.querySelectorAll("input.step_led"));
@@ -420,10 +452,19 @@
                 };
                 steps.push(step);
             });
-            setPatternData({
+            const newPatternData = {
                 "brightness": parseInt(document.querySelector("#brightness").value) || 0,
                 "steps": steps,
-            });
+            };
+
+            if (renderForm) {
+                setPatternData(newPatternData);
+            } else {
+                patternData = normalizePatternData(newPatternData);
+                checkPatternData();
+                generateCodeFromPatternData();
+                window.localStorage.setItem("patternData", JSON.stringify(patternData));
+            }
         }
 
         function generateCodeFromPatternData() {
@@ -449,6 +490,14 @@
                 result.push(led);
             });
             return result;
+        }
+
+        function updateSliderValue(input) {
+            const output = input.parentElement.querySelector("output");
+            if (output) {
+                output.value = input.value;
+                output.innerText = input.value;
+            }
         }
 
         function setupDemo() {
@@ -531,15 +580,16 @@
             </div>
             <div>
                 <label for="brightness">Brightness:</label>
-                <input id="brightness" type="number" value="128" min="0" max="255">
+                <input id="brightness" type="range" min="0" max="255">
+                <output for="brightness" class="sliderValue"></output>
             </div>
         </section>
         <section>
             <h2>Animation Steps:</h2>
             <template id="stepLedTemplate">
                 <div>
-                    <label for="step_led">LED <span class="lednum">?</span>:</label> <input type="number" id="step_led"
-                        class="step_led" min="0" max="255">
+                    <label for="step_led">LED <span class="lednum">?</span>:</label> <input type="range" id="step_led"
+                        class="step_led" min="0" max="255"> <output for="step_led" class="sliderValue"></output>
                 </div>
             </template>
             <template id="stepTemplate">
