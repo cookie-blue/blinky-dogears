@@ -295,8 +295,10 @@
         }
 
         function loadLocalStorage() {
-            const result = loadDataFromLocalStorage("patternData") || emptyPattern();
-            if (typeof result !== "object") {
+            const result = loadDataFromLocalStorage("patternData");
+            if (result === undefined) {
+                resetPatternData();
+            } else if (typeof result !== "object" || result === null) {
                 console.error("invalid format in local storage");
                 resetPatternData();
             } else {
