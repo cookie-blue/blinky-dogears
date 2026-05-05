@@ -93,7 +93,7 @@
         }
     </style>
     <script>
-        let patternData = [];
+        let patternData = emptyPattern();
         let ledCount = 2;
 
         addEventListener("DOMContentLoaded", () => {
@@ -121,26 +121,32 @@
                 loadFromForm();
             });
 
+            document.querySelector("#brightness").addEventListener("change", () => {
+                loadFromForm();
+            });
+
             document.querySelector("#add").addEventListener("click", () => {
                 appendPatternStep();
             });
 
             document.querySelector("#ledcount").addEventListener("change", (event) => {
-                setupDemo();
+                const previousLedCount = ledCount;
                 ledCount = parseInt(event.target.value);
-                const stepcount = patternData.length;
-                const totalBrightness = patternData.reduce((previous, current) => previous + current[0].reduce((a, b) => a + b), 0);
+                const stepcount = patternData["steps"].length;
+                const totalBrightness = patternData["steps"].reduce((previous, current) => previous + current["leds"].reduce((a, b) => a + b, 0), 0);
 
                 if (stepcount > 0 && totalBrightness > 0) {
                     const response = confirm("Warning! this will clear all existing steps.");
                     if (!response) {
-                        event.target.value = stepcount;
-                        ledCount = stepcount;
+                        ledCount = previousLedCount;
+                        event.target.value = previousLedCount;
+                        setupDemo();
                         return;
                     }
                 }
 
-                setPatternData([]);
+                setupDemo();
+                setPatternData(emptyPattern());
             })
         });
 
@@ -149,18 +155,23 @@
             setupDemo();
 
             let step1 = emptyStep();
-            step1[0][0] = 255;
+            step1["leds"][0] = 255;
             let step2 = emptyStep();
-            step2[0][1] = 255;
-            setPatternData([step1, step2]);
+            step2["leds"][1] = 255;
+            setPatternData({
+                "brightness": 128,
+                "steps": [step1, step2],
+            });
         }
 
         function setPatternData(value) {
-            patternData = value
+            patternData = normalizePatternData(value);
             console.log(`updated pattern data: ${JSON.stringify(patternData)}`);
             checkPatternData();
 
-            ledCount = patternData[0][0].length;
+            if (patternData["steps"].length > 0) {
+                ledCount = patternData["steps"][0]["leds"].length;
+            }
             generateFormFromPatternData();
             generateCodeFromPatternData();
             window.localStorage.setItem("patternData", JSON.stringify(patternData));
@@ -168,41 +179,95 @@
         }
 
         function appendPatternStep() {
-            patternData.push(emptyStep());
-            console.log(`updated pattern data: ${JSON.stringify(patternData)}`);
-            checkPatternData();
-
-            generateFormFromPatternData();
-            generateCodeFromPatternData();
-            window.localStorage.setItem("patternData", JSON.stringify(patternData));
-
+            patternData["steps"].push(emptyStep());
+            setPatternData(patternData);
         }
 
         function removePatternStep(index) {
-            setPatternData(patternData.filter((item, i) => i != index));
+            setPatternData({
+                ...patternData,
+                "steps": patternData["steps"].filter((item, i) => i != index),
+            });
         }
 
         function checkPatternData() {
-            const totalTime = patternData.reduce((previous, current) => previous + current[1], 0);
+            const totalTime = patternData["steps"].reduce((previous, current) => previous + current["duration"], 0);
             if (totalTime < 5) {
-                appendPatternStep();
+                patternData["steps"].push(emptyStep());
             }
 
-            patternData = patternData.map((step, index) => {
-                if (step.length == 0) {
+            patternData["steps"] = patternData["steps"].map((step, index) => {
+                if (step['leds'].length == 0) {
                     return emptyStep();
                 }
                 return step;
             });
         }
 
+        function emptyPattern() {
+            return {
+                "brightness": 128,
+                "steps": [],
+            }
+        }
+
         function emptyStep() {
-            return [Array(ledCount).fill(0), 1000, 0];
+            return {
+                "leds": Array(ledCount).fill(0),
+                "duration": 1000,
+                "fade": false,
+            }
+        }
+
+        function normalizePatternData(value) {
+            if (Array.isArray(value)) {
+                return {
+                    "brightness": 128,
+                    "steps": value.map(normalizeStep),
+                };
+            }
+
+            if (typeof value !== "object" || value === null || !Array.isArray(value["steps"])) {
+                return emptyPattern();
+            }
+
+            return {
+                "brightness": parseNumber(value["brightness"], 128, 0, 255),
+                "steps": value["steps"].map(normalizeStep),
+            };
+        }
+
+        function normalizeStep(step) {
+            if (Array.isArray(step)) {
+                return {
+                    "leds": (step[0] || []).map((value) => clamp(parseInt(value) || 0, 0, 255)),
+                    "duration": clamp(parseInt(step[1]) || 0, 0, 60000),
+                    "fade": Boolean(step[2]),
+                };
+            }
+
+            return {
+                "leds": ((step || {})["leds"] || []).map((value) => clamp(parseInt(value) || 0, 0, 255)),
+                "duration": clamp(parseInt((step || {})["duration"]) || 0, 0, 60000),
+                "fade": Boolean((step || {})["fade"]),
+            };
+        }
+
+        function clamp(value, min, max) {
+            return Math.min(Math.max(value, min), max);
+        }
+
+        function parseNumber(value, fallback, min, max) {
+            const parsed = parseInt(value);
+            if (Number.isNaN(parsed)) {
+                return fallback;
+            }
+            return clamp(parsed, min, max);
         }
 
         function loadLocalStorage() {
-            const result = loadDataFromLocalStorage("patternData") || [];
-            if (typeof result !== "object" || typeof result[0] !== "object" || typeof result[0][0] !== "object") {
+            const result = loadDataFromLocalStorage("patternData") || emptyPattern();
+            if (typeof result !== "object") {
                 console.error("invalid format in local storage");
                 resetPatternData();
             } else {
@@ -238,12 +303,12 @@
             }
 
             const durationInput = clone.querySelector("input#step_duration")
-            durationInput.value = step[1] || "";
+            durationInput.value = step["duration"] || "";
             durationInput.id = `step_duration_${index}`;
             clone.querySelector("label[for=\"step_duration\"]").setAttribute("for", `step_duration_${index}`);
 
             const fadeInput = clone.querySelector("input#step_fade");
-            fadeInput.checked = step[2] || false;
+            fadeInput.checked = step["fade"] || false;
             fadeInput.id = `step_fade_${index}`;
             clone.querySelector("label[for=\"step_fade\"]").setAttribute("for", `step_fade_${index}`);
 
@@ -260,7 +325,7 @@
             const led = document.querySelector("#stepLedTemplate").content.cloneNode(true);
             const ledInput = led.querySelector("input");
             ledInput.id = `step_led_${index}_${lednum}`;
-            ledInput.value = (step[0] || [])[lednum] || 0;
+            ledInput.value = (step["leds"] || [])[lednum] || 0;
 
             led.querySelector("label").setAttribute("for", `step_led_${index}_${lednum}`);
             led.querySelector("label span.lednum").innerText = lednum + 1;
@@ -269,7 +334,25 @@
         }
 
         function loadFromCode() {
-            let code = document.querySelector("#code").value
+            const code = document.querySelector("#code").value;
+            setPatternData(parsePatternCode(code));
+            patternData["steps"].forEach((step, index) => {
+                if (step["leds"].length != patternData["steps"][0]["leds"].length) {
+                    throw new Error(`Inconsistent LED count: ${ledCount} in step 1 vs. ${step["leds"].length} in step ${index + 1}`);
+                }
+            });
+        }
+
+        function parsePatternCode(code) {
+            const patternMatch = code.match(/\.brightness\s*=\s*(\d+)\s*,\s*\.steps\s*=\s*\{([\s\S]*)\}/);
+            if (patternMatch) {
+                return {
+                    "brightness": parseInt(patternMatch[1]),
+                    "steps": parseNamedSteps(patternMatch[2]),
+                };
+            }
+
+            let oldCode = code
                 // variable declaration prefix
                 .replace(/^[^\{]+/, '')
 
@@ -283,56 +366,77 @@
                 .replaceAll('{', '[')
                 .replaceAll('}', ']');
 
-            if (code.substr(0, 3) !== '[[[') {
-                code = `[${code}]`;
+            if (oldCode.substr(0, 3) !== '[[[') {
+                oldCode = `[${oldCode}]`;
             }
 
-            setPatternData(JSON.parse(code));
-            patternData.forEach((step, index) => {
-                if (step[0].length != patternData[0][0].length) {
-                    throw new Error(`Inconsistent LED count: ${ledCount} in step 1 vs. ${step[0].length} in step ${index + 1}`);
-                }
-            });
+            return JSON.parse(oldCode);
+        }
+
+        function parseNamedSteps(stepsCode) {
+            const steps = [];
+            const stepRegex = /\{\s*\.leds\s*=\s*\{([^}]*)\}\s*,\s*\.duration\s*=\s*(\d+)\s*,\s*\.fade\s*=\s*(true|false|0|1)\s*\}/g;
+            let match;
+
+            while ((match = stepRegex.exec(stepsCode)) !== null) {
+                steps.push({
+                    "leds": match[1].split(",").map((value) => clamp(parseInt(value) || 0, 0, 255)),
+                    "duration": clamp(parseInt(match[2]) || 0, 0, 60000),
+                    "fade": match[3] === "true" || match[3] === "1",
+                });
+            }
+
+            if (steps.length == 0) {
+                throw new Error("No steps found");
+            }
+
+            return steps;
         }
 
         function generateFormFromPatternData() {
             document.querySelector("#steps tbody").innerHTML = "";
 
-            patternData.forEach((step, index) => {
+            patternData["steps"].forEach((step, index) => {
                 newStep(step, index);
             });
 
-            if (patternData.length > 0 && patternData[0].length > 0) {
-                document.querySelector("#ledcount").value = parseInt(patternData[0][0].length);
+            document.querySelector("#brightness").value = patternData["brightness"];
+
+            if (patternData["steps"].length > 0 && patternData["steps"][0]["leds"].length > 0) {
+                document.querySelector("#ledcount").value = parseInt(patternData["steps"][0]["leds"].length);
             }
         }
 
         function loadFromForm() {
-            let result = [];
+            let steps = [];
             document.querySelectorAll("#steps .step").forEach((element) => {
-                leds = generateLeds(element.querySelectorAll("input.step_led"));
-                duration = parseInt(element.querySelector("input.step_duration").value) || 0;
-                fade = element.querySelector("input.step_fade").checked ? 1 : 0;
-                const step = [leds, duration, fade];
-                result.push(step);
+                const leds = generateLeds(element.querySelectorAll("input.step_led"));
+                const duration = parseInt(element.querySelector("input.step_duration").value) || 0;
+                const fade = element.querySelector("input.step_fade").checked;
+                const step = {
+                    "leds": leds,
+                    "duration": duration,
+                    "fade": fade,
+                };
+                steps.push(step);
             });
-            setPatternData(result);
+            setPatternData({
+                "brightness": parseInt(document.querySelector("#brightness").value) || 0,
+                "steps": steps,
+            });
         }
 
         function generateCodeFromPatternData() {
-            result = JSON.stringify(patternData);
-            const cleanedData = result
-                // braces
-                .replaceAll('[', '{')
-                .replaceAll(']', '}')
+            if (patternData["steps"].length > 0) {
+                const steps = patternData["steps"]
+                    .map((step) => `    {.leds = {${step["leds"].join(", ")}}, .duration = ${step["duration"]}, .fade = ${step["fade"] ? "true" : "false"}}`)
+                    .join(",\n");
 
-                // linebreaks + indentation
-                .replaceAll(',{{', ',\n  {{')
-                .replace(/^{/, '{\n  ')
-                .replace(/}$/, '\n}');
-
-            if (result !== "[]") {
-                document.querySelector("#code").value = `const Step patterns[][MAX_PATTERN_LENGTH] = ${cleanedData};`;
+                document.querySelector("#code").value = [
+                    "{ .brightness = " + patternData["brightness"] + ", .steps = {",
+                    steps,
+                    "}}",
+                ].join("\n");
             } else {
                 document.querySelector("#code").value = "";
             }
@@ -361,9 +465,9 @@
 
         async function runDemo() {
             while (true) {
-                let currentPatternData = [...patternData];
-                for (const index in currentPatternData) {
-                    const step = currentPatternData[index];
+                let currentPatternData = JSON.parse(JSON.stringify(patternData));
+                for (const index in currentPatternData["steps"]) {
+                    const step = currentPatternData["steps"][index];
                     highlightCurrentStep(index);
                     const demoStep = await runDemoStep(step);
                 }
@@ -383,9 +487,10 @@
         function runDemoStep(step) {
             return new Promise((resolve) => {
                 const ledColor = document.querySelector("#ledcolor").value;
-                const isFade = Boolean(step[2]);
-                const duration = parseInt(step[1]);
-                const leds = step[0];
+                const isFade = Boolean(step["fade"]);
+                const duration = parseInt(step["duration"]);
+                const leds = step["leds"];
+                const patternBrightness = patternData["brightness"] / 255;
                 leds.forEach((value, index) => {
                     const leds = document.querySelectorAll("#demo .demoLed");
                     if (leds.length < index + 1) {
@@ -396,12 +501,13 @@
                     } else {
                         leds[index].style.transition = `none`;
                     }
-                    const newColor = `${ledColor}${value.toString(16).padStart(2, "0")}`;
+                    const alpha = Math.round(value * patternBrightness);
+                    const newColor = `${ledColor}${alpha.toString(16).padStart(2, "0")}`;
                     leds[index].style.backgroundColor = newColor;
                 });
                 setTimeout(() => {
                     resolve();
-                }, parseInt(step[1]));
+                }, duration);
             });
         }
     </script>
@@ -422,6 +528,10 @@
             <div>
                 <label for="ledcount">LED Count:</label>
                 <input id="ledcount" type="number" value="2" min="1">
+            </div>
+            <div>
+                <label for="brightness">Brightness:</label>
+                <input id="brightness" type="number" value="128" min="0" max="255">
             </div>
         </section>
         <section>
@@ -472,7 +582,10 @@
             <label for="code">
                 <h2>Code</h2>
             </label>
-            <textarea id="code" cols="50" rows="10" placeholder="{{{255, 0}, 1000, 0}, {{0, 255}, 1000, 0}}"></textarea>
+            <textarea id="code" cols="50" rows="10" placeholder="{ .brightness = 128, .steps = {
+    {.leds = {255, 0}, .duration = 300, .fade = false},
+    {.leds = {0, 255}, .duration = 300, .fade = false},
+}}"></textarea>
             <br>
             <button id="load">Load</button> <button id="reset" class="secondary">Reset</button>
             <div id="loadOK">OK</div>
