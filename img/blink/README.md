@@ -7,3 +7,6 @@
 ![](blink03.gif)
 
 ![](blink04.gif)
+
+> [!NOTE]
+> Yes, the last one really is very bright.
