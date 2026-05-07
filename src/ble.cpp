@@ -17,7 +17,7 @@ static bool parseUnsignedCommandValue(const std::string &command, int &value)
         }
     }
 
-    value = atoi(command.substr(1).c_str());
+    value = atoi(command.substr(1, 3).c_str());
     return true;
 }
 
