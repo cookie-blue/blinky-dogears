@@ -79,7 +79,6 @@ class CommandCallbacks : public NimBLECharacteristicCallbacks
             }
             else
             {
-                brightness = std::stoi(rx.substr(1));
                 PatternManager::override(255 * brightness / 100);
             }
         }
@@ -93,7 +92,6 @@ class CommandCallbacks : public NimBLECharacteristicCallbacks
             }
             else
             {
-                brightness = std::stoi(rx.substr(1));
                 PatternManager::overrideBrightness(255 * brightness / 100);
             }
         }
