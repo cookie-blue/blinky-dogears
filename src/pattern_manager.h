@@ -29,6 +29,7 @@ public:
     static void override(uint8_t brightness);
     static void overrideBrightness(uint8_t brightness);
     static uint8_t getCurrentPattern();
+    static uint8_t getNumPatterns();
     static uint8_t getCurrentStep();
     static void nextStep();
 };

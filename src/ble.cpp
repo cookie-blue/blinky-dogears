@@ -2,6 +2,25 @@
 
 NimBLECharacteristic *BLE::_bleCharacteristic;
 
+static bool parseUnsignedCommandValue(const std::string &command, int &value)
+{
+    if (command.length() <= 1)
+    {
+        return false;
+    }
+
+    for (size_t i = 1; i < command.length(); i++)
+    {
+        if (!isdigit(static_cast<unsigned char>(command[i])))
+        {
+            return false;
+        }
+    }
+
+    value = atoi(command.substr(1).c_str());
+    return true;
+}
+
 class ServerCallbacks : public NimBLEServerCallbacks
 {
     void onConnect(NimBLEServer *bleServer, NimBLEConnInfo &connInfo) override
@@ -62,13 +81,29 @@ class CommandCallbacks : public NimBLECharacteristicCallbacks
         }
         else if (rx.length() > 1 && rx[0] == 'P')
         {
-            int pattern = std::stoi(rx.substr(1));
-            PatternManager::setPattern(pattern - 1);
+            int pattern = 0;
+            if (!parseUnsignedCommandValue(rx, pattern) || pattern < 1 || pattern > PatternManager::getNumPatterns())
+            {
+                Log::log("Pattern command out of range: %s", rx.c_str());
+                response = "ERR";
+            }
+            else
+            {
+                PatternManager::setPattern(pattern - 1);
+            }
         }
         else if (rx.length() > 1 && rx[0] == 'S')
         {
-            int output = std::stoi(rx.substr(1));
-            StaticOutput::toggle(output);
+            int output = 0;
+            if (!parseUnsignedCommandValue(rx, output) || output < 1 || output > STATIC_OUTPUT_COUNT)
+            {
+                Log::log("Static output command out of range: %s", rx.c_str());
+                response = "ERR";
+            }
+            else
+            {
+                StaticOutput::toggle(output - 1);
+            }
         }
         else
         {

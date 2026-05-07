@@ -92,6 +92,11 @@ uint8_t PatternManager::getCurrentPattern()
     return PatternManager::_currentPattern;
 }
 
+uint8_t PatternManager::getNumPatterns()
+{
+    return PatternManager::_numPatterns;
+}
+
 uint8_t PatternManager::getCurrentStep()
 {
     return PatternManager::_currentStep;
