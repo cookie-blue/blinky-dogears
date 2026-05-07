@@ -9,6 +9,6 @@ void LED::write(uint8_t ledPin, uint8_t brightness)
         patternBrightness = (PatternManager::brightnessOverride / 255) * brightness;
     }
 
-    DUTY_TYPE gammaValue = PGM_READ_DUTY(&gammaMap[(uint8_t)brightness]);
+    DUTY_TYPE gammaValue = PGM_READ_DUTY(&gammaMap[(uint8_t)patternBrightness]);
     ledcWrite(ledPin, gammaValue);
 }
