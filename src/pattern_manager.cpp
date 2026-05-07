@@ -19,6 +19,9 @@ void PatternManager::runPattern()
     if (!PatternManager::_poweredOn)
         return;
 
+    if (PatternManager::_patternLengths[PatternManager::_currentPattern] == 0)
+        return;
+
     if (patterns[PatternManager::_currentPattern].steps[PatternManager::_currentStep].fade)
         FadePattern::run();
     else
@@ -104,7 +107,16 @@ uint8_t PatternManager::getCurrentStep()
 
 void PatternManager::nextStep()
 {
-    PatternManager::_currentStep = (PatternManager::_currentStep + 1) % PatternManager::_patternLengths[PatternManager::_currentPattern];
+    uint8_t patternLength = PatternManager::_patternLengths[PatternManager::_currentPattern];
+
+    if (patternLength == 0)
+    {
+        Log::log("Pattern %d has no valid steps", PatternManager::_currentPattern);
+        PatternManager::_currentStep = 0;
+        return;
+    }
+
+    PatternManager::_currentStep = (PatternManager::_currentStep + 1) % patternLength;
 }
 
 void PatternManager::_switchPattern()
