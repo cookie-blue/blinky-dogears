@@ -19,7 +19,6 @@ void StaticOutput::init()
 void StaticOutput::toggle(uint8_t output)
 {
     uint8_t state = digitalRead(staticOutputPins[output]);
-    state = (STATIC_OUTPUT_INVERTED ? !state : state);
     digitalWrite(staticOutputPins[output], !state);
     Log::log("Static output %d set to %s", output + 1, !state ? "ON" : "OFF");
 }
