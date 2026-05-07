@@ -9,11 +9,19 @@ void StaticOutput::init()
     for (uint8_t i = 0; i < STATIC_OUTPUT_COUNT; i++)
     {
         pinMode(staticOutputPins[i], OUTPUT);
-        digitalWrite(staticOutputPins[i], STATIC_OUTPUT_INVERTED ? HIGH : LOW);
     }
+    StaticOutput::off();
 #else
     Log::log("No static outputs configured");
 #endif
+}
+
+void StaticOutput::off()
+{
+    for (uint8_t i = 0; i < STATIC_OUTPUT_COUNT; i++)
+    {
+        digitalWrite(staticOutputPins[i], STATIC_OUTPUT_INVERTED ? HIGH : LOW);
+    }
 }
 
 void StaticOutput::toggle(uint8_t output)

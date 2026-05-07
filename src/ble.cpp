@@ -68,6 +68,7 @@ class CommandCallbacks : public NimBLECharacteristicCallbacks
         else if (rx == "OFF" || rx == "0")
         {
             PatternManager::off();
+            StaticOutput::off();
         }
         else if (rx.length() > 1 && rx[0] == 'B')
         {
