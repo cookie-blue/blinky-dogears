@@ -21,7 +21,7 @@ void LED::write(uint8_t ledPin, uint8_t brightness)
     float patternBrightness = brightness * patterns[pattern].brightness / 255;
 
     if (PatternManager::brightnessOverride > 0) {
-        patternBrightness = brightness * patterns[pattern].brightness / 255;
+        patternBrightness = brightness * PatternManager::brightnessOverride / 255;
     }
 
     DUTY_TYPE gammaValue = PGM_READ_DUTY(&gammaMap[(uint8_t)patternBrightness]);
