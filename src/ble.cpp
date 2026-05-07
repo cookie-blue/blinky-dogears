@@ -27,11 +27,12 @@ class CommandCallbacks : public NimBLECharacteristicCallbacks
         Log::log("Received command: %s", rx.c_str());
         Indicator::blink(1, 50);
 
+        std::string response = "P" + std::to_string(PatternManager::getCurrentPattern());
+
         if (rx == "PING")
         {
             Log::log("PING received");
-            bleCharacteristic->setValue("PONG");
-            bleCharacteristic->notify();
+            response = "PONG";
         }
         else if (rx == "+")
         {
@@ -64,12 +65,17 @@ class CommandCallbacks : public NimBLECharacteristicCallbacks
             int pattern = std::stoi(rx.substr(1));
             PatternManager::setPattern(pattern - 1);
         }
+        else if (rx.length() > 1 && rx[0] == 'S')
+        {
+            int output = std::stoi(rx.substr(1));
+            StaticOutput::toggle(output);
+        }
         else
         {
             Log::log("Unknown command!");
+            response = "ERR";
         }
 
-        std::string response = "P" + std::to_string(PatternManager::getCurrentPattern());
         bleCharacteristic->setValue(response);
         bleCharacteristic->notify();
     }

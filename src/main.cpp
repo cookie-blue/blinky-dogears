@@ -26,6 +26,7 @@ void setup()
         Log::log("LED pin %d: %d...", i, ledPins[i]);
         ledcAttach(ledPins[i], PWM_FREQUENCY, PWM_RESOLUTION);
     }
+    StaticOutput::init();
     Log::log("Button pin %d", BUTTON_PIN);
     pinMode(BUTTON_PIN, INPUT_PULLUP);
 

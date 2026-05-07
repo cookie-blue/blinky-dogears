@@ -6,6 +6,10 @@
 #define LED_COUNT 2
 const uint8_t ledPins[LED_COUNT] = {0, 1};
 
+#define STATIC_OUTPUT_COUNT 1
+const uint8_t staticOutputPins[STATIC_OUTPUT_COUNT] = {2};
+#define STATIC_OUTPUT_INVERTED false
+
 #define STATUS_LED_PIN 8  // comment out to disable
 #define STATUS_LED_INVERTED true
 

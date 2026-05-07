@@ -5,5 +5,6 @@
 #include "fade_pattern.h"
 #include "instant_pattern.h"
 #include "button_handler.h"
+#include "static_output.h"
 #include "ble.h"
 #include "ota.h"

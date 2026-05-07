@@ -23,6 +23,9 @@ The following Commands are Supported:
 * `DX` Override pattern brightness to X% (gamma corrected) (`D10` = 10%, `D69` = 69% etc.)
 * `OFF` Turn LEDs off
 * `ON` Turn LEDs on and resume Pattern
+* `SX` Toggle static output X (`S1`, `S2` etc.)
+
+Static outputs are configured in `src/config.h` via `STATIC_OUTPUT_COUNT` and `staticOutputPins`. They are separate GPIO outputs and are never changed by pattern commands.
 
 ## PCB
 
