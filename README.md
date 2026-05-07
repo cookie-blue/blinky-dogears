@@ -1,4 +1,4 @@
-# Blinky Dogears
+# Blinky Dog Ears
 
 [Blink Patterns](img/blink/README.md)
 
