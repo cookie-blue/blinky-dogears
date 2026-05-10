@@ -1,6 +1,5 @@
 #pragma once
 
-#include "pattern_manager.h"
 #include "instant_pattern.h"
 #include "fade_pattern.h"
 #include <cstdlib>
