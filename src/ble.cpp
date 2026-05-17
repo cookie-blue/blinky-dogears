@@ -26,13 +26,15 @@ class ServerCallbacks : public NimBLEServerCallbacks
     void onConnect(NimBLEServer *bleServer, NimBLEConnInfo &connInfo) override
     {
         Log::log("Client %s connected", connInfo.getAddress().toString().c_str());
-        Indicator::blink(2, 50, 50);
+        uint8_t color[] = {0, 255, 0};
+        Indicator::blink(2, 50, 50, color);
     }
 
     void onDisconnect(NimBLEServer *bleServer, NimBLEConnInfo &connInfo, int reason) override
     {
         Log::log("Client %s disconnected. Reason %d", connInfo.getAddress().toString().c_str(), reason);
-        Indicator::blink(3, 50, 50);
+        uint8_t color[] = {255, 0, 0};
+        Indicator::blink(3, 50, 50, color);
         NimBLEDevice::startAdvertising();
     }
 };
@@ -44,7 +46,8 @@ class CommandCallbacks : public NimBLECharacteristicCallbacks
         std::string rx = bleCharacteristic->getValue();
 
         Log::log("Received command: %s", rx.c_str());
-        Indicator::blink(1, 50);
+        uint8_t color[] = {0, 0, 255};
+        Indicator::blink(1, 50, color);
 
         std::string response = "P" + std::to_string(PatternManager::getCurrentPattern());
 
@@ -184,8 +187,6 @@ void BLE::init()
 
     BLE::_bleCharacteristic->setCallbacks(new CommandCallbacks());
     BLE::_bleCharacteristic->setValue("READY");
-
-    bleService->start();
 
     NimBLEAdvertising *bleAdvertising = NimBLEDevice::getAdvertising();
     bleAdvertising->addServiceUUID(BLE_SERVICE_UUID);

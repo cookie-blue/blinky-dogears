@@ -32,7 +32,8 @@ void setup()
 
     Indicator::init();
 
-    Indicator::on();
+    uint8_t color[] = {0, 0, 255};
+    Indicator::set(HIGH, color);
     while (millis() < OTA_BOOT_TIMEOUT)
     {
         if (digitalRead(BUTTON_PIN) == LOW)

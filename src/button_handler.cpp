@@ -27,7 +27,8 @@ void ButtonHandler::check()
         if (pressDuration >= BUTTON_LONG_PRESS_DURATION && !ButtonHandler::_longPressHandled)
         {
             Log::log("Long press detected: %lu ms", pressDuration);
-            Indicator::blink(1, 100);
+            uint8_t color[] = {255, 255, 0};
+            Indicator::blink(1, 100, color);
 
             _longPressHandled = true;
         }

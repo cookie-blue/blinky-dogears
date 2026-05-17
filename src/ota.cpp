@@ -54,7 +54,8 @@ void OTA::init()
                                Log::log("OTA error: end"); });
     ArduinoOTA.begin();
     Log::log("OTA ready");
-    Indicator::blink(1, 100);
+    uint8_t color[] = {0, 255, 0};
+    Indicator::blink(1, 100, color);
     OTA::_isReady = true;
 }
 
@@ -64,7 +65,8 @@ void OTA::handle()
     if (millis() - OTA::_previousMillis >= 2000)
     {
         OTA::_previousMillis = millis();
-        Indicator::blink(1, 100);
+        uint8_t color[] = {255, 0, 255};
+        Indicator::blink(1, 100, color);
     }
 }
 

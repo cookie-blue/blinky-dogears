@@ -3,17 +3,27 @@
 #include <Arduino.h>
 
 // -- Pin Configuration ---
-#define LED_COUNT 2
+#define LED_COUNT 4
 const uint8_t ledPins[LED_COUNT] = {0, 1};
 
 #define STATIC_OUTPUT_COUNT 1
 const uint8_t staticOutputPins[STATIC_OUTPUT_COUNT] = {2};
 #define STATIC_OUTPUT_INVERTED false
 
+#if CONFIG_IDF_TARGET_ESP32S3
+#define STATUS_LED_PIN WS_RGB
+#define STATUS_LED_MODE_RGB
+#else
 #define STATUS_LED_PIN 8  // comment out to disable
 #define STATUS_LED_INVERTED true
+#endif
 
+#if CONFIG_IDF_TARGET_ESP32S3
+#define BUTTON_PIN 0
+#else
 #define BUTTON_PIN 9
+#endif
+
 #define BUTTON_DEBOUNCE_DELAY 50
 #define BUTTON_LONG_PRESS_DURATION 3000
 
