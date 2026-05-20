@@ -6,10 +6,10 @@ bool Indicator::_isOn = false;
 uint8_t Indicator::_count;
 unsigned int Indicator::_durationOn;
 unsigned int Indicator::_durationOff;
-#ifdef STATUS_LED_MODE_RGB
 uint8_t Indicator::_color[3];
 rmt_data_t Indicator::_ledData[24];
 
+#ifdef STATUS_LED_MODE_RGB
 void Indicator::buildLedData(bool isOn, const uint8_t color[3])
 {
     uint8_t packet[3] = {0, 0, 0};
@@ -104,17 +104,20 @@ void Indicator::set(uint8_t state)
 #endif
 }
 
-#ifdef STATUS_LED_MODE_RGB
 void Indicator::set(uint8_t state, uint8_t color[])
 {
 #ifdef STATUS_LED_PIN
+#ifdef STATUS_LED_MODE_RGB
     Indicator::_isOn = state;
     memcpy(_color, color, sizeof(_color));
     buildLedData(state == HIGH, color);
     rmtWrite(STATUS_LED_PIN, Indicator::_ledData, 24, RMT_WAIT_FOR_EVER);
+#else
+    (void)color;
+    Indicator::set(state);
+#endif
 #endif
 }
-#endif
 
 void Indicator::run()
 {
