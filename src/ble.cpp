@@ -188,6 +188,10 @@ void BLE::init()
     BLE::_bleCharacteristic->setCallbacks(new CommandCallbacks());
     BLE::_bleCharacteristic->setValue("READY");
 
+#if CONFIG_IDF_TARGET_ESP32C3
+    bleService->start();
+#endif
+
     NimBLEAdvertising *bleAdvertising = NimBLEDevice::getAdvertising();
     bleAdvertising->addServiceUUID(BLE_SERVICE_UUID);
 
